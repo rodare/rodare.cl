@@ -289,7 +289,8 @@ PositionAlign.prototype = {
     points. This method can be invoked with no arguments which will cause the
     widget's current `align` Attribute value to be synced to the DOM.
 
-    @example Aligning to the top-left corner of the `<body>`:
+    @example Aligning to the top-left corner of the `<body>
+`:
 
         myWidget.align('body',
             [Y.WidgetPositionAlign.TL, Y.WidgetPositionAlign.TR]);

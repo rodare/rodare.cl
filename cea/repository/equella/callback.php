@@ -81,7 +81,8 @@ $js =<<<EOD
     }
     </script>
 </head>
-<body><noscript></noscript></body>
+<body>
+<noscript></noscript></body>
 </html>
 EOD;
 

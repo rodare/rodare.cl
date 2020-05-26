@@ -31,7 +31,8 @@ define('CHAT_EVENT_TYPE_CHATTIME', 'chattime');
 
 // The HTML head for the message window to start with (<!-- nix --> is used to get some browsers starting with output.
 global $CHAT_HTMLHEAD;
-$CHAT_HTMLHEAD = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\" \"http://www.w3.org/TR/REC-html40/loose.dtd\"><html><head></head>\n<body>\n\n".padding(200);
+$CHAT_HTMLHEAD = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\" \"http://www.w3.org/TR/REC-html40/loose.dtd\"><html><head></head>\n<body>
+\n\n".padding(200);
 
 // The HTML head for the message window to start with (with js scrolling).
 global $CHAT_HTMLHEAD_JS;
@@ -56,11 +57,13 @@ $CHAT_HTMLHEAD_JS .= padding(200);
 
 // The HTML code for standard empty pages (e.g. if a user was kicked out).
 global $CHAT_HTMLHEAD_OUT;
-$CHAT_HTMLHEAD_OUT = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\" \"http://www.w3.org/TR/REC-html40/loose.dtd\"><html><head><title>You are out!</title></head><body></body></html>";
+$CHAT_HTMLHEAD_OUT = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\" \"http://www.w3.org/TR/REC-html40/loose.dtd\"><html><head><title>You are out!</title></head><body>
+</body></html>";
 
 // The HTML head for the message input page.
 global $CHAT_HTMLHEAD_MSGINPUT;
-$CHAT_HTMLHEAD_MSGINPUT = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\" \"http://www.w3.org/TR/REC-html40/loose.dtd\"><html><head><title>Message Input</title></head><body>";
+$CHAT_HTMLHEAD_MSGINPUT = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\" \"http://www.w3.org/TR/REC-html40/loose.dtd\"><html><head><title>Message Input</title></head><body>
+";
 
 // The HTML code for the message input page, with JavaScript.
 global $CHAT_HTMLHEAD_MSGINPUT_JS;

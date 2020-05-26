@@ -67,6 +67,7 @@ top.location.href = '{$redirect}';
 </script>
 </head>
 <body>
+
 <noscript>
 {$clickhere}
 </noscript>

@@ -659,7 +659,8 @@ class core_renderer extends renderer_base {
 
     /**
      * The standard tags (typically skip links) that should be output just inside
-     * the start of the <body> tag. Designed to be called in theme layout.php files.
+     * the start of the <body>
+ tag. Designed to be called in theme layout.php files.
      *
      * @return string HTML fragment.
      */
@@ -1038,7 +1039,8 @@ class core_renderer extends renderer_base {
 
     /**
      * Start output by sending the HTTP headers, and printing the HTML <head>
-     * and the start of the <body>.
+     * and the start of the <body>
+.
      *
      * To control what is printed, you should set properties on $PAGE. If you
      * are familiar with the old {@link print_header()} function from Moodle 1.9
@@ -1220,12 +1222,14 @@ class core_renderer extends renderer_base {
 
     /**
      * Close all but the last open container. This is useful in places like error
-     * handling, where you want to close all the open containers (apart from <body>)
+     * handling, where you want to close all the open containers (apart from <body>
+)
      * before outputting the error message.
      *
      * @param bool $shouldbenone assert that the stack should be empty now - causes a
      *      developer debug warning if it isn't.
-     * @return string the HTML required to close any open containers inside <body>.
+     * @return string the HTML required to close any open containers inside <body>
+.
      */
     public function container_end_all($shouldbenone = false) {
         return $this->opencontainers->pop_all_but_last($shouldbenone);

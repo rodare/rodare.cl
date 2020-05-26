@@ -400,7 +400,8 @@ class assign_submission_onlinetext extends assign_submission_plugin {
                                          $onlinetextsubmission->onlineformat,
                                          array('context'=>$this->assignment->get_context()));
             $head = '<head><meta charset="UTF-8"></head>';
-            $submissioncontent = '<!DOCTYPE html><html>' . $head . '<body>'. $formattedtext . '</body></html>';
+            $submissioncontent = '<!DOCTYPE html><html>' . $head . '<body>
+'. $formattedtext . '</body></html>';
 
             $filename = get_string('onlinetextfilename', 'assignsubmission_onlinetext');
             $files[$filename] = array($submissioncontent);

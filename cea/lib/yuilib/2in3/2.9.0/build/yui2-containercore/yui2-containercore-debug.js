@@ -1386,7 +1386,8 @@ version: 2.9.0
                                  "YAHOO.widget.Module.textResizeEvent.",
                                  "fire();};<",
                                  "\/script></head>",
-                                 "<body></body></html>"].join('');
+                                 "<body>
+</body></html>"].join('');
 
                         oIFrame.src = "data:text/html;charset=utf-8," + encodeURIComponent(sHTML);
                     }

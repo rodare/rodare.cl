@@ -35,6 +35,7 @@ class HTMLPurifier_Lexer_PH5P extends HTMLPurifier_Lexer_DOMLex
         $this->tokenizeDOM(
             $doc->getElementsByTagName('html')->item(0)-> // <html>
                 getElementsByTagName('body')->item(0) //   <body>
+
             ,
             $tokens
         );

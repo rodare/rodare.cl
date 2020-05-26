@@ -104,7 +104,8 @@ class CAS_Client
             str_replace(
                 '__TITLE__', $title,
                 (empty($this->_output_header)
-                ? '<html><head><title>__TITLE__</title></head><body><h1>__TITLE__</h1>'
+                ? '<html><head><title>__TITLE__</title></head><body>
+<h1>__TITLE__</h1>'
                 : $this->_output_header)
             )
         );

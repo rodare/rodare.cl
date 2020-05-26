@@ -68,6 +68,7 @@ header('X-UA-Compatible: IE=edge');
 </head>
 <body>
 
+
 <object type="application/x-java-applet" id="dragmath" width="520" height="300">
     <param name="java_codebase" value="<?php echo $relroot.'/lib/dragmath/applet/' ?>" />
     <param name="java_code" value="Display/MainApplet.class" />

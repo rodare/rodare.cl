@@ -74,7 +74,8 @@ defined('MOODLE_INTERNAL') || die();
  * @property-read string $docspath The path to the Moodle docs for this page.
  * @property-read string $focuscontrol The id of the HTML element to be focused when the page has loaded.
  * @property-read bool $headerprinted True if the page header has already been printed.
- * @property-read string $heading The main heading that should be displayed at the top of the <body>.
+ * @property-read string $heading The main heading that should be displayed at the top of the <body>
+.
  * @property-read string $headingmenu The menu (or actions) to display in the heading
  * @property-read array $layout_options An arrays with options for the layout file.
  * @property-read array $legacythemeinuse True if the legacy browser theme is in use.
@@ -563,7 +564,8 @@ class moodle_page {
 
     /**
      * Please do not call this method directly, use the ->heading syntax. {@link moodle_page::__get()}.
-     * @return string the main heading that should be displayed at the top of the <body>.
+     * @return string the main heading that should be displayed at the top of the <body>
+.
      */
     protected function magic_get_heading() {
         return $this->_heading;
@@ -1134,7 +1136,8 @@ class moodle_page {
      * from the script name. However, on some pages this is overridden.
      * For example the page type for course/view.php includes the course format,
      * for example 'course-view-weeks'. This gets used as the id attribute on
-     * <body> and also for determining which blocks are displayed.
+     * <body>
+ and also for determining which blocks are displayed.
      *
      * @param string $pagetype e.g. 'my-index' or 'mod-quiz-attempt'.
      */
@@ -1230,7 +1233,8 @@ class moodle_page {
      * Sets the heading to use for the page.
      * This is normally used as the main heading at the top of the content.
      *
-     * @param string $heading the main heading that should be displayed at the top of the <body>.
+     * @param string $heading the main heading that should be displayed at the top of the <body>
+.
      */
     public function set_heading($heading) {
         $this->_heading = format_string($heading);

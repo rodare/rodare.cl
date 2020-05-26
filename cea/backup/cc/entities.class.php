@@ -292,7 +292,8 @@ class entities {
         // Need to make sure that the html passed has charset meta tag.
         $metatag = '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />';
         if (strpos($html, $metatag) === false) {
-            $html = '<html><head>'.$metatag.'</head><body>'.$html.'</body></html>';
+            $html = '<html><head>'.$metatag.'</head><body>
+'.$html.'</body></html>';
         }
 
         $document = new DOMDocument();
@@ -310,7 +311,8 @@ class entities {
         $bodyitems = $domdocument->getElementsByTagName('body');
         if ($bodyitems->length > 0) {
             $body = $bodyitems->item(0);
-            $html = str_ireplace(array('<body>', '</body>'), '', $body->C14N());
+            $html = str_ireplace(array('<body>
+', '</body>'), '', $body->C14N());
         }
 
         return $html;

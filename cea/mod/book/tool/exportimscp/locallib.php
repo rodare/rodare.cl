@@ -252,7 +252,8 @@ function booktool_exportimscp_chapter_content($chapter, $context) {
     $content .= '<link rel="stylesheet" type="text/css" href="../css/styles.css" />' . "\n";
     $content .= '<title>' . $chaptertitle . '</title>' . "\n";
     $content .= '</head>' . "\n";
-    $content .= '<body>' . "\n";
+    $content .= '<body>
+' . "\n";
     $content .= '<h1 id="header">' . $chaptertitle . '</h1>' ."\n";
     $content .= $chaptercontent . "\n";
     $content .= '</body>' . "\n";

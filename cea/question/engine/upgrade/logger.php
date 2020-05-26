@@ -46,7 +46,8 @@ class question_engine_assumption_logger {
         $this->handle = fopen($CFG->dataroot . '/upgradelogs/qe_' .
                 $date . '.html', 'a');
         fwrite($this->handle, '<html><head><title>Question engine upgrade assumptions ' .
-                $date . '</title></head><body><h2>Question engine upgrade assumptions ' .
+                $date . '</title></head><body>
+<h2>Question engine upgrade assumptions ' .
                 $date . "</h2>\n\n");
     }
 

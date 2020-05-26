@@ -171,6 +171,7 @@ if ($refreshusers) {
         </script>
     </head>
     <body>
+
 <?php
 if ($beep) {
     echo '<script> (function() {';

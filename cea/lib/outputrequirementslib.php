@@ -934,7 +934,8 @@ class page_requirements_manager {
     }
 
     /**
-     * Ensure that a skip link to a given target is printed at the top of the <body>.
+     * Ensure that a skip link to a given target is printed at the top of the <body>
+.
      *
      * You must call this function before {@link get_top_of_body_code()}, (if not, an exception
      * will be thrown). That normally means you must call this before the call to print_header.
@@ -1539,13 +1540,15 @@ class page_requirements_manager {
     }
 
     /**
-     * Generate any HTML that needs to go at the start of the <body> tag.
+     * Generate any HTML that needs to go at the start of the <body>
+ tag.
      *
      * Normally, this method is called automatically by the code that prints the
      * <head> tag. You should not normally need to call it in your own code.
      *
      * @param renderer_base $renderer
-     * @return string the HTML code to go at the start of the <body> tag.
+     * @return string the HTML code to go at the start of the <body>
+ tag.
      */
     public function get_top_of_body_code(renderer_base $renderer) {
         // First the skip links.
@@ -1661,7 +1664,8 @@ class page_requirements_manager {
     }
 
     /**
-     * Have we already output the code at the start of the <body> tag?
+     * Have we already output the code at the start of the <body>
+ tag?
      *
      * @return bool
      */

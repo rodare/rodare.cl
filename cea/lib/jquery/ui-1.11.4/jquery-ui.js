@@ -1684,7 +1684,8 @@ $.widget("ui.draggable", $.ui.mouse, {
 		try {
 
 			// Support: IE9, IE10
-			// If the <body> is blurred, IE will switch windows, see #9520
+			// If the <body>
+ is blurred, IE will switch windows, see #9520
 			if ( document.activeElement && document.activeElement.nodeName.toLowerCase() !== "body" ) {
 
 				// Blur any element that currently has focus, see #4261
@@ -10245,7 +10246,8 @@ var dialog = $.widget( "ui.dialog", {
 				activeElement = this.document[ 0 ].activeElement;
 
 				// Support: IE9, IE10
-				// If the <body> is blurred, IE will switch windows, see #4520
+				// If the <body>
+ is blurred, IE will switch windows, see #4520
 				if ( activeElement && activeElement.nodeName.toLowerCase() !== "body" ) {
 
 					// Hiding a focused element doesn't trigger blur in WebKit

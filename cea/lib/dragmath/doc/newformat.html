@@ -2,7 +2,8 @@
 <HTML><HEAD><TITLE>DragMath Documentation - Adding an output format</TITLE>
 <META http-equiv=Content-Type content="text/html; charset=iso-8859-1">
 <META content="MSHTML 6.00.6000.16525" name=GENERATOR></HEAD>
-<BODY>
+<body>
+
 <DIV><FONT face=Arial color=#000080 size=5><STRONG>Adding an output format</STRONG></FONT></DIV>
 <DIV><FONT face=Arial size=2>
 <DIV><FONT face=Arial size=2><FONT face=Arial><FONT size=2>
@@ -14,16 +15,16 @@ files can also be used as templates for creating files for different formats.
 There are a number of rules and options that you need to be aware of to
 successfully create an XML file for a new format.</p>Each math object has
 its own element in the XML document, with a familiar name describing it, for
-example “Add”. Within this element there are a number of sub-elements depending
+example ï¿½Addï¿½. Within this element there are a number of sub-elements depending
 upon how many arguments the object has.</FONT></FONT></FONT></DIV>
 <DIV><FONT face=Arial size=2><FONT face=Arial><FONT size=2><BR>N-ary operators
-have a single ‘output’ element e.g. for addition this
+have a single ï¿½outputï¿½ element e.g. for addition this
 is&nbsp;<BR>&nbsp;&nbsp;&nbsp;&nbsp; <STRONG><FONT
 color=#800080>&lt;Add&gt;</FONT><BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <FONT color=#800080>&lt;output&gt;</FONT>+<FONT
 color=#800080>&lt;/output&gt;<BR></FONT>&nbsp;&nbsp;&nbsp; <FONT
 color=#800080>&lt;/Add&gt;<BR></FONT></STRONG><BR>Binary Operators have 3
-‘output’ elements e.g. for fraction in Latex this is<BR>&nbsp;&nbsp;&nbsp; <FONT
+ï¿½outputï¿½ elements e.g. for fraction in Latex this is<BR>&nbsp;&nbsp;&nbsp; <FONT
 color=#800080><STRONG>&lt;Divide</STRONG> <FONT
 color=#000000>brackets=</FONT><FONT
 color=#0000ff>"false"</FONT><STRONG>&gt;</STRONG></FONT><BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -33,7 +34,7 @@ color=#000000>{</FONT>&lt;/output1&gt;</FONT><BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 color=#800080>&lt;/output2&gt;<BR></FONT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <FONT color=#800080>&lt;output3&gt;</FONT>}<FONT
 color=#800080>&lt;/output3&gt;<BR></FONT>&nbsp;&nbsp;&nbsp; <FONT
-color=#800080>&lt;/Divide&gt;</FONT><BR></STRONG><BR>Functions have 2 ‘output’
+color=#800080>&lt;/Divide&gt;</FONT><BR></STRONG><BR>Functions have 2 ï¿½outputï¿½
 elements e.g. for square root in Latex this is<BR>&nbsp;&nbsp;<STRONG>&nbsp;
 </STRONG><FONT color=#800080><STRONG>&lt;SquareRoot</STRONG> <FONT
 color=#000000>brackets=</FONT><FONT
@@ -67,12 +68,12 @@ size=2><FONT face=Arial><FONT
 size=2></FONT></FONT></FONT></FONT></FONT></FONT>&nbsp;</DIV></DIV>
 <DIV>
 <DIV><FONT face=Arial size=2><FONT face=Arial><FONT size=2><FONT face=Arial
-size=2><FONT face=Arial><FONT size=2>Symbols have 1 ‘output’ element e.g. for
+size=2><FONT face=Arial><FONT size=2>Symbols have 1 ï¿½outputï¿½ element e.g. for
 Infinity in Latex this is<BR>&nbsp;&nbsp;<STRONG>&nbsp;<FONT color=#800080>
 &lt;Infinity&gt;<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 &lt;output&gt;<FONT
 color=#000000>\infty</FONT>&lt;/output&gt;<BR>&nbsp;&nbsp;&nbsp;
-&lt;/Infinity&gt;</FONT></STRONG><BR><BR>Groupings have 2 ‘output’ elements e.g.
+&lt;/Infinity&gt;</FONT></STRONG><BR><BR>Groupings have 2 ï¿½outputï¿½ elements e.g.
 for square brackets in Latex this is<BR>&nbsp;&nbsp;&nbsp; <FONT
 color=#800080><STRONG>&lt;BracketsSq&gt;<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 &lt;output1&gt;<FONT
@@ -97,10 +98,10 @@ color=#000000>\\</FONT>&nbsp;&lt;/rowEnd&gt;<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&n
 &lt;/Matrix&gt;</FONT></STRONG><BR><BR><BR>The syntax within these tags is used
 when converting an expression to that particular format. The actual arguments of
 the objects appear in the syntax between each pair of tags. For example consider
-½ in Latex format.&nbsp; It has 3 ‘output’ elements. So the first part will be
-‘\frac{‘, then the first argument will be appended to the string giving us,
-‘\frac{1’, then the 2nd output will be appended, ‘\frac{1}{‘, then the 2nd
-argment, \frac{1}{2’ and then the final output, ‘\frac{1}{2}’. A similar process
+ï¿½ in Latex format.&nbsp; It has 3 ï¿½outputï¿½ elements. So the first part will be
+ï¿½\frac{ï¿½, then the first argument will be appended to the string giving us,
+ï¿½\frac{1ï¿½, then the 2nd output will be appended, ï¿½\frac{1}{ï¿½, then the 2nd
+argment, \frac{1}{2ï¿½ and then the final output, ï¿½\frac{1}{2}ï¿½. A similar process
 takes place with all the object types of objects, with the argument being
 appended between each pair of output elements.<BR><BR>There are various options
 that can be set to allow more control over the
@@ -111,7 +112,7 @@ size=2></FONT></FONT></FONT></FONT></FONT></FONT>&nbsp;</DIV>
 <DIV><FONT face=Arial size=2><FONT face=Arial><FONT size=2><FONT face=Arial
 size=2><FONT face=Arial><FONT size=2><U>Reverse</U><BR>If you find the arguments
 of a binary operator&nbsp;being output in the wrong order for a format, you can
-reverse the order of them by setting, reverse=”true”. An example of this is with
+reverse the order of them by setting, reverse=ï¿½trueï¿½. An example of this is with
 the N-th root in Latex,<BR>&nbsp;&nbsp;&nbsp; <FONT
 color=#800080><STRONG>&lt;NthRoot</STRONG> <FONT
 color=#000000>reverse=</FONT><FONT color=#0000ff>"true"</FONT> <FONT
@@ -130,7 +131,7 @@ size=2><U></U></FONT></FONT></FONT></FONT></FONT></FONT>&nbsp;</DIV>
 <DIV><U>Argument Order</U></DIV>
 <DIV>If you find the arguments of an N-ary Function being output in the wrong
 order for a format, you can re-arrange the order of them by setting,
-order=”#1,#2,#3,...,#n”. An example of this is with the&nbsp;Sum in Latex.
+order=ï¿½#1,#2,#3,...,#nï¿½. An example of this is with the&nbsp;Sum in Latex.
 Obviously, the default order&nbsp;for this is&nbsp;0,1,2,3, and it is being
 changed to 1,2,3,0.<BR>&nbsp;&nbsp;&nbsp; <FONT
 color=#800080><STRONG>&lt;Sum</STRONG> <FONT color=#000000>order=</FONT><FONT
@@ -170,7 +171,7 @@ color=#800080>&lt;Sine&gt;<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 &lt;output1&gt;<FONT color=#000000>\sin</FONT>
 &lt;/output1&gt;<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;output2
 /&gt;<BR>&nbsp;&nbsp;&nbsp; &lt;/Sine&gt;</FONT></STRONG><BR><BR>Brackets are
-automatically added after the ‘\sin’ and after the 2nd output, resulting in
+automatically added after the ï¿½\sinï¿½ and after the 2nd output, resulting in
 "\sin(arg)". This is often the desired result but if you need to turn the
 brackets off, they can be set for each individual function. An example of
 turning them off is shown here for Square root in
@@ -189,14 +190,14 @@ size=2><U></U></FONT></FONT></FONT></FONT></FONT></FONT>&nbsp;</DIV>
 <DIV><FONT face=Arial size=2><FONT face=Arial><FONT size=2><FONT face=Arial
 size=2><FONT face=Arial><FONT size=2><U>Initial</U><BR>As well as the structured
 number of output elements for each type of object, there is the option of having
-an ‘initial’ element. The data in this element is added to the string before any
+an ï¿½initialï¿½ element. The data in this element is added to the string before any
 other output element is. An example of its use for describing multiplication in
 MathML Content is shown below.<BR>&nbsp;&nbsp;&nbsp; <STRONG><FONT
 color=#800080>&lt;Add&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 &lt;initial&gt;<FONT
 color=#000000>&lt;times/&gt;</FONT>&lt;/initial&gt;<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 &lt;output&lt;/output&gt;&nbsp;<BR>&nbsp;&nbsp;&nbsp;
-&lt;/Add&gt;<BR></FONT></STRONG><BR>&nbsp;‘a x b x c’ would then be converted
+&lt;/Add&gt;<BR></FONT></STRONG><BR>&nbsp;ï¿½a x b x cï¿½ would then be converted
 to,<BR>&nbsp;&nbsp;&nbsp;
 &lt;times/&gt;<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 &lt;ci&gt;a&lt;/ci&gt;<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;

@@ -123,7 +123,8 @@
 
     function outputText($texexp) {
         header("Content-type: text/html; charset=utf-8");
-        echo "<html><body><pre>\n";
+        echo "<html><body>
+<pre>\n";
         if ($texexp) {
             echo s($texexp)."\n\n";
         } else {
@@ -315,6 +316,7 @@
 <html>
 <head><title>TeX Filter Debugger</title></head>
 <body>
+
   <p>Please enter an algebraic expression <b>without</b> any surrounding $$ into
        the text box below. (Click <a href="#help">here for help.</a>)
           <form action="texdebug.php" method="get"

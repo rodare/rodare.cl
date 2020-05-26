@@ -80,7 +80,8 @@ if ($reloadparent == true) {
         window.close();
     </script>
 </head>
-<body></body>
+<body>
+</body>
 </html>
 EOD;
     die($js);
@@ -103,6 +104,7 @@ $js =<<<EOD
     </script>
 </head>
 <body>
+
     <noscript>
     {$strrefreshnonjs}
     </noscript>

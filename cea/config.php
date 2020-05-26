@@ -17,8 +17,8 @@ $CFG->dboptions = array (
   'dbsocket' => '',
 );
 
-$CFG->wwwroot   = 'http://rodare.cl/cea';
-$CFG->dataroot  = '/home/artedial/moodledata';
+$CFG->wwwroot   = '/Applications/XAMPP/xamppfiles/htdocs/rodare.cl/cea';
+$CFG->dataroot  = '/Applications/XAMPP/xamppfiles/moodledata';
 $CFG->admin     = 'admin';
 
 $CFG->directorypermissions = 0777;

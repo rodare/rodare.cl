@@ -2042,6 +2042,8 @@ width: 80%; -moz-border-radius: 20px; padding: 15px">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 '.$meta.'
 <title>' . $title . '</title>
-</head><body>' . $content . $footer . '</body></html>';
+</head><body>
+  
+' . $content . $footer . '</body></html>';
     }
 }

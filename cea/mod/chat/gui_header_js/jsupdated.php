@@ -113,6 +113,7 @@ $refreshurl = "{$CFG->wwwroot}/mod/chat/gui_header_js/jsupdated.php?".
     </head>
     <body>
 
+
 <?php
 
 // Ensure the HTML head makes it out there.

@@ -176,7 +176,8 @@ class qformat_xhtml extends qformat_default {
         $xp .= $css;
         $xp .= "</style>\n";
         $xp .= "</head>\n";
-        $xp .= "<body>\n";
+        $xp .= "<body>
+\n";
         $xp .= "<form action=\"...REPLACE ME...\" method=\"post\">\n\n";
         $xp .= $content;
         $xp .= "<p class=\"submit\">\n";

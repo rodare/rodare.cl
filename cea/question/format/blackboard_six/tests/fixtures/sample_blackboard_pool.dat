@@ -10,7 +10,8 @@
         <QUESTION id='q27' class='QUESTION_FILLINBLANK' points='1'/>
     </QUESTIONLIST>
     <QUESTION_TRUEFALSE id='q1'>
-        <BODY>
+        <body>
+
             <TEXT><![CDATA[<span style="font-size:12pt">42 is the Absolute Answer to everything.</span>]]></TEXT>
             <FLAGS>
                 <ISHTML value='true'/>
@@ -30,7 +31,8 @@
         </GRADABLE>
     </QUESTION_TRUEFALSE>
     <QUESTION_MULTIPLECHOICE id='q7'>
-        <BODY>
+        <body>
+
             <TEXT><![CDATA[<span style="font-size:12pt">What's between orange and green in the spectrum?</span>]]></TEXT>
             <FLAGS>
                 <ISHTML value='true'/>
@@ -53,7 +55,8 @@
         </GRADABLE>
     </QUESTION_MULTIPLECHOICE>
     <QUESTION_MULTIPLEANSWER id='q8'>
-        <BODY>
+        <body>
+
             <TEXT><![CDATA[<span style="font-size:12pt">What's between orange and green in the spectrum?</span>]]></TEXT>
             <FLAGS>
                 <ISHTML value='true'/>
@@ -80,7 +83,8 @@
         </GRADABLE>
     </QUESTION_MULTIPLEANSWER>
     <QUESTION_MATCH id='q39-44'>
-        <BODY>
+        <body>
+
             <TEXT><![CDATA[<i>Classify the animals.</i>]]></TEXT>
             <FLAGS>
                 <ISHTML value='true'/>
@@ -112,7 +116,8 @@
         </GRADABLE>
     </QUESTION_MATCH>
     <QUESTION_ESSAY id='q9'>
-        <BODY>
+        <body>
+
             <TEXT><![CDATA[How are you?]]></TEXT>
             <FLAGS>
                 <ISHTML value='true'/>
@@ -126,7 +131,8 @@
         </GRADABLE>
     </QUESTION_ESSAY>
     <QUESTION_FILLINBLANK id='q27'>
-        <BODY>
+        <body>
+
             <TEXT><![CDATA[<span style="font-size:12pt">Name an amphibian: __________.</span>]]></TEXT>
             <FLAGS>
                 <ISHTML value='true'/>

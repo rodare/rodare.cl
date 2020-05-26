@@ -272,7 +272,8 @@ class ChatDaemon {
             return false;
         }
         //]]>
-        </script></head><body><table><tbody>
+        </script></head><body>
+<table><tbody>
 EOD;
 
         // Get the users from that chatroom.

@@ -181,7 +181,8 @@ function tool_dbtransfer_create_maintenance_file() {
 <!DOCTYPE html>
 <html>
 <header><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><header/>
-<body>$message</body>
+<body>
+$message</body>
 </html>
 OET;
 

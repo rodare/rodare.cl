@@ -48,6 +48,7 @@ header('X-UA-Compatible: IE=edge');
 </head>
 <body>
 
+
     <table border="0" align="center" style="width:100%;">
 <?php
 

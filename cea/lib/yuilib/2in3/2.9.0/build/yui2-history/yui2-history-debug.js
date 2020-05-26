@@ -184,7 +184,8 @@ YAHOO.util.History = (function () {
 
         var html, doc;
 
-        html = '<html><body><div id="state">' +
+        html = '<html><body>
+<div id="state">' +
                     YAHOO.lang.escapeHTML(fqstate) +
                '</div></body></html>';
 

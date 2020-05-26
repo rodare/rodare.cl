@@ -75,7 +75,8 @@ table {
 }
 </style>
 </head>
-<body>";
+<body>
+";
     }
 
     /**

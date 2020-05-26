@@ -480,7 +480,8 @@ AppBase = Y.Base.create('app', Y.Base, [View, Router, PjaxBase], {
 
     /**
     Overrides View's container destruction to deal with the `viewContainer` and
-    checks to make sure not to remove and purge the `<body>`.
+    checks to make sure not to remove and purge the `<body>
+`.
 
     @method _destroyContainer
     @protected
@@ -492,7 +493,8 @@ AppBase = Y.Base.create('app', Y.Base, [View, Router, PjaxBase], {
             viewContainer = this.get('viewContainer'),
             areSame       = container.compareTo(viewContainer);
 
-        // We do not want to remove or destroy the `<body>`.
+        // We do not want to remove or destroy the `<body>
+`.
         if (Y.one('body').compareTo(container)) {
             // Just clean-up our events listeners.
             this.detachEvents();
@@ -870,7 +872,8 @@ AppBase = Y.Base.create('app', Y.Base, [View, Router, PjaxBase], {
         allowing the container's contents to be re-rendered at any time without
         losing event subscriptions.
 
-        The default container is the `<body>` Node, but you can override this in
+        The default container is the `<body>
+` Node, but you can override this in
         a subclass, or by passing in a custom `container` config value at
         instantiation time.
 

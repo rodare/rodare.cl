@@ -2426,12 +2426,14 @@ class xhtml_container_stack {
 
     /**
      * Close all but the last open container. This is useful in places like error
-     * handling, where you want to close all the open containers (apart from <body>)
+     * handling, where you want to close all the open containers (apart from <body>
+)
      * before outputting the error message.
      *
      * @param bool $shouldbenone assert that the stack should be empty now - causes a
      *      developer debug warning if it isn't.
-     * @return string the HTML required to close any open containers inside <body>.
+     * @return string the HTML required to close any open containers inside <body>
+.
      */
     public function pop_all_but_last($shouldbenone = false) {
         if ($shouldbenone && count($this->opencontainers) != 1) {
