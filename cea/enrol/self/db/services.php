@@ -29,8 +29,7 @@ $functions = array(
         'methodname'  => 'get_instance_info',
         'classpath'   => 'enrol/self/externallib.php',
         'description' => 'self enrolment instance information.',
-        'type'        => 'read',
-        'services'    => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
+        'type'        => 'read'
     ),
 
     'enrol_self_enrol_user' => array(
@@ -38,7 +37,6 @@ $functions = array(
         'methodname'  => 'enrol_user',
         'classpath'   => 'enrol/self/externallib.php',
         'description' => 'Self enrol the current user in the given course.',
-        'type'        => 'write',
-        'services'    => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
+        'type'        => 'write'
     )
 );

@@ -12,7 +12,6 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-/* global rangy */
 
 /**
  * @module moodle-editor_atto-editor
@@ -30,7 +29,7 @@
 
 function EditorSelection() {}
 
-EditorSelection.ATTRS = {
+EditorSelection.ATTRS= {
 };
 
 EditorSelection.prototype = {
@@ -253,7 +252,7 @@ EditorSelection.prototype = {
             return false;
         }
 
-        selectednodes.each(function(node) {
+        selectednodes.each(function(node){
             // Check each node, if it doesn't match the tags AND is not within the specified tags then fail this thing.
             if (requireall) {
                 // Check for at least one failure.

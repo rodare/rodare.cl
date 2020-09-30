@@ -27,7 +27,9 @@
 
 require_once(__DIR__ . '/../../../../../lib/behat/behat_base.php');
 
-use Behat\Mink\Exception\ExpectationException as ExpectationException,
+use Behat\Behat\Context\Step\Given,
+    Behat\Behat\Context\Step\Then,
+    Behat\Mink\Exception\ExpectationException as ExpectationException,
     Behat\Mink\Exception\ElementNotFoundException as ElementNotFoundException;
 
 /**
@@ -43,11 +45,12 @@ class behat_gradereport_grader extends behat_base {
      * @Given /^I click on student "([^"]*)" for grade item "([^"]*)"$/
      * @param string $student
      * @param string $itemname
+     * @return Given
      */
     public function i_click_on_student_and_grade_item($student, $itemname) {
         $xpath = $this->get_student_and_grade_cell_selector($student, $itemname);
 
-        $this->execute("behat_general::i_click_on", array($this->escape($xpath), "xpath_element"));
+        return new Given('I click on "' . $this->escape($xpath) . '" "xpath_element"');
     }
 
     /**
@@ -56,11 +59,12 @@ class behat_gradereport_grader extends behat_base {
      * @Given /^I click away from student "([^"]*)" and grade item "([^"]*)" value$/
      * @param string $student
      * @param string $itemname
+     * @return Given
      */
     public function i_click_away_from_student_and_grade_value($student, $itemname) {
         $xpath = $this->get_student_and_grade_value_selector($student, $itemname);
 
-        $this->execute('behat_general::i_take_focus_off_field', array($this->escape($xpath), 'xpath_element'));
+        return new Given('I take focus off "' . $this->escape($xpath) . '" "xpath_element"');
     }
 
     /**
@@ -69,11 +73,12 @@ class behat_gradereport_grader extends behat_base {
      * @Given /^I click away from student "([^"]*)" and grade item "([^"]*)" feedback$/
      * @param string $student
      * @param string $itemname
+     * @return Given
      */
     public function i_click_away_from_student_and_grade_feedback($student, $itemname) {
         $xpath = $this->get_student_and_grade_feedback_selector($student, $itemname);
 
-        $this->execute('behat_general::i_take_focus_off_field', array($this->escape($xpath), 'xpath_element'));
+        return new Given('I take focus off "' . $this->escape($xpath) . '" "xpath_element"');
     }
 
     /**
@@ -85,6 +90,7 @@ class behat_gradereport_grader extends behat_base {
      * @param string $student
      * @param string $itemname
      * @param string $value
+     * @return Then
      */
     public function the_grade_should_match($student, $itemname, $value) {
         $xpath = $this->get_student_and_grade_value_selector($student, $itemname);
@@ -106,7 +112,7 @@ class behat_gradereport_grader extends behat_base {
             }
         } else {
             // If there isn't a form field, just search for contents.
-            $valueliteral = behat_context_helper::escape($value);
+            $valueliteral = $this->getSession()->getSelectorsHandler()->xpathLiteral($value);
 
             $xpath = $this->get_student_and_grade_cell_selector($student, $itemname);
             $xpath .= "[contains(normalize-space(.)," . $valueliteral . ")]";
@@ -125,11 +131,12 @@ class behat_gradereport_grader extends behat_base {
      * @Then /^I should see a grade field for "([^"]*)" and grade item "([^"]*)"$/
      * @param string $student
      * @param string $itemname
+     * @return Then
      */
     public function i_should_see_grade_field($student, $itemname) {
         $xpath = $this->get_student_and_grade_value_selector($student, $itemname);
 
-        $this->execute('behat_general::should_be_visible', array($this->escape($xpath), 'xpath_element'));
+        return new Then('"' . $this->escape($xpath) . '" "xpath_element" should be visible');
     }
 
     /**
@@ -138,11 +145,12 @@ class behat_gradereport_grader extends behat_base {
      * @Then /^I should see a feedback field for "([^"]*)" and grade item "([^"]*)"$/
      * @param string $student
      * @param string $itemname
+     * @return Then
      */
     public function i_should_see_feedback_field($student, $itemname) {
         $xpath = $this->get_student_and_grade_feedback_selector($student, $itemname);
 
-        $this->execute('behat_general::should_be_visible', array($this->escape($xpath), 'xpath_element'));
+        return new Then('"' . $this->escape($xpath) . '" "xpath_element" should be visible');
     }
 
     /**
@@ -151,11 +159,12 @@ class behat_gradereport_grader extends behat_base {
      * @Then /^I should not see a grade field for "([^"]*)" and grade item "([^"]*)"$/
      * @param string $student
      * @param string $itemname
+     * @return Then
      */
     public function i_should_not_see_grade_field($student, $itemname) {
         $xpath = $this->get_student_and_grade_value_selector($student, $itemname);
 
-        $this->execute('behat_general::should_not_exist', array($this->escape($xpath), 'xpath_element'));
+        return new Then('"' . $this->escape($xpath) . '" "xpath_element" should not exist');
     }
 
     /**
@@ -164,11 +173,12 @@ class behat_gradereport_grader extends behat_base {
      * @Then /^I should not see a feedback field for "([^"]*)" and grade item "([^"]*)"$/
      * @param string $student
      * @param string $itemname
+     * @return Then
      */
     public function i_should_not_see_feedback_field($student, $itemname) {
         $xpath = $this->get_student_and_grade_feedback_selector($student, $itemname);
 
-        $this->execute('behat_general::should_not_exist', array($this->escape($xpath), 'xpath_element'));
+        return new Then('"' . $this->escape($xpath) . '" "xpath_element" should not exist');
     }
 
     /**
@@ -258,5 +268,6 @@ class behat_gradereport_grader extends behat_base {
         $cell = $this->get_student_and_grade_cell_selector($student, $itemname);
         return $cell . "//input[contains(@id, 'feedback_') or @name='ajaxfeedback']";
     }
+
 
 }

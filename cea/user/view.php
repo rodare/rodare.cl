@@ -25,6 +25,7 @@
 require_once("../config.php");
 require_once($CFG->dirroot.'/user/profile/lib.php');
 require_once($CFG->dirroot.'/user/lib.php');
+require_once($CFG->dirroot.'/tag/lib.php');
 require_once($CFG->libdir . '/filelib.php');
 require_once($CFG->libdir . '/badgeslib.php');
 
@@ -110,12 +111,12 @@ $fullname = fullname($user, has_capability('moodle/site:viewfullnames', $coursec
 if ($currentuser) {
     if (!is_viewing($coursecontext) && !is_enrolled($coursecontext)) {
         // Need to have full access to a course to see the rest of own info.
-        $referer = get_local_referer(false);
-        if (!empty($referer)) {
-            redirect($referer, get_string('notenrolled', '', $fullname));
-        }
         echo $OUTPUT->header();
         echo $OUTPUT->heading(get_string('notenrolled', '', $fullname));
+        $referer = get_local_referer(false);
+        if (!empty($referer)) {
+            echo $OUTPUT->continue_button($referer);
+        }
         echo $OUTPUT->footer();
         die;
     }
@@ -136,17 +137,17 @@ if ($currentuser) {
         //       or test for course:inspect capability.
         if (has_capability('moodle/role:assign', $coursecontext)) {
             $PAGE->navbar->add($fullname);
-            $notice = get_string('notenrolled', '', $fullname);
+            echo $OUTPUT->header();
+            echo $OUTPUT->heading(get_string('notenrolled', '', $fullname));
         } else {
+            echo $OUTPUT->header();
             $PAGE->navbar->add($struser);
-            $notice = get_string('notenrolledprofile', '', $fullname);
+            echo $OUTPUT->heading(get_string('notenrolledprofile'));
         }
         $referer = get_local_referer(false);
         if (!empty($referer)) {
-            redirect($referer, $notice);
+            echo $OUTPUT->continue_button($referer);
         }
-        echo $OUTPUT->header();
-        echo $OUTPUT->heading($notice);
         echo $OUTPUT->footer();
         exit;
     }

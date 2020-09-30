@@ -21,7 +21,8 @@ Feature: Enable Block blog menu in a course
       | enableblogs | 0 |
     And I log out
     And I log in as "teacher1"
-    And I am on "Course 1" course homepage with editing mode on
+    And I follow "Course 1"
+    And I turn editing mode on
     When I add the "Blog menu" block
     Then I should see "Blogging is disabled!" in the "Blog menu" "block"
 
@@ -31,7 +32,8 @@ Feature: Enable Block blog menu in a course
       | useblogassociations | 0 |
     And I log out
     And I log in as "teacher1"
-    And I am on "Course 1" course homepage with editing mode on
+    And I follow "Course 1"
+    And I turn editing mode on
     When I add the "Blog menu" block
     Then I should see "Blog entries" in the "Blog menu" "block"
     And I should see "Add a new entry" in the "Blog menu" "block"
@@ -45,7 +47,8 @@ Feature: Enable Block blog menu in a course
       | useblogassociations | 1 |
     And I log out
     And I log in as "teacher1"
-    And I am on "Course 1" course homepage with editing mode on
+    And I follow "Course 1"
+    And I turn editing mode on
     When I add the "Blog menu" block
     Then I should see "Blog entries" in the "Blog menu" "block"
     And I should see "Add a new entry" in the "Blog menu" "block"
@@ -59,7 +62,8 @@ Feature: Enable Block blog menu in a course
       | enablerssfeeds | 0 |
     And I log out
     And I log in as "teacher1"
-    And I am on "Course 1" course homepage with editing mode on
+    And I follow "Course 1"
+    And I turn editing mode on
     When I add the "Blog menu" block
     Then I should not see "Blog RSS feed" in the "Blog menu" "block"
     And I should see "Add a new entry" in the "Blog menu" "block"
@@ -70,7 +74,8 @@ Feature: Enable Block blog menu in a course
       | enablerssfeeds | 1 |
     And I log out
     And I log in as "teacher1"
-    And I am on "Course 1" course homepage with editing mode on
+    And I follow "Course 1"
+    And I turn editing mode on
     When I add the "Blog menu" block
     Then I should see "Blog RSS feed" in the "Blog menu" "block"
     And I should see "Add a new entry" in the "Blog menu" "block"

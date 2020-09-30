@@ -46,9 +46,6 @@ class manager {
     /** @var bool $sessionactive Is the session active? */
     protected static $sessionactive = null;
 
-    /** @var string $logintokenkey Key used to get and store request protection for login form. */
-    protected static $logintokenkey = 'core_auth_login';
-
     /**
      * Start user session.
      *
@@ -75,15 +72,11 @@ class manager {
         try {
             self::$handler->init();
             self::prepare_cookies();
-            $isnewsession = empty($_COOKIE[session_name()]);
+            $newsid = empty($_COOKIE[session_name()]);
 
-            if (!self::$handler->start()) {
-                // Could not successfully start/recover session.
-                throw new \core\session\exception(get_string('servererror'));
-            }
+            self::$handler->start();
 
-            self::initialise_user_session($isnewsession);
-            self::$sessionactive = true; // Set here, so the session can be cleared if the security check fails.
+            self::initialise_user_session($newsid);
             self::check_security();
 
             // Link global $USER and $SESSION,
@@ -97,10 +90,13 @@ class manager {
             $_SESSION['SESSION'] =& $GLOBALS['SESSION'];
 
         } catch (\Exception $ex) {
+            @session_write_close();
             self::init_empty_session();
             self::$sessionactive = false;
             throw $ex;
         }
+
+        self::$sessionactive = true;
     }
 
     /**
@@ -161,19 +157,10 @@ class manager {
     public static function init_empty_session() {
         global $CFG;
 
-        if (isset($GLOBALS['SESSION']->notifications)) {
-            // Backup notifications. These should be preserved across session changes until the user fetches and clears them.
-            $notifications = $GLOBALS['SESSION']->notifications;
-        }
         $GLOBALS['SESSION'] = new \stdClass();
 
         $GLOBALS['USER'] = new \stdClass();
         $GLOBALS['USER']->id = 0;
-
-        if (!empty($notifications)) {
-            // Restore notifications.
-            $GLOBALS['SESSION']->notifications = $notifications;
-        }
         if (isset($CFG->mnet_localhost_id)) {
             $GLOBALS['USER']->mnethostid = $CFG->mnet_localhost_id;
         } else {
@@ -193,7 +180,9 @@ class manager {
     protected static function prepare_cookies() {
         global $CFG;
 
-        $cookiesecure = is_moodle_cookie_secure();
+        if (!isset($CFG->cookiesecure) or (!is_https() and empty($CFG->sslproxy))) {
+            $CFG->cookiesecure = 0;
+        }
 
         if (!isset($CFG->cookiehttponly)) {
             $CFG->cookiehttponly = 0;
@@ -254,7 +243,7 @@ class manager {
 
         // Set configuration.
         session_name($sessionname);
-        session_set_cookie_params(0, $CFG->sessioncookiepath, $CFG->sessioncookiedomain, $cookiesecure, $CFG->cookiehttponly);
+        session_set_cookie_params(0, $CFG->sessioncookiepath, $CFG->sessioncookiedomain, $CFG->cookiesecure, $CFG->cookiehttponly);
         ini_set('session.use_trans_sid', '0');
         ini_set('session.use_only_cookies', '1');
         ini_set('session.hash_function', '0');        // For now MD5 - we do not have room for sha-1 in sessions table.
@@ -440,7 +429,6 @@ class manager {
      * Do various session security checks.
      *
      * WARNING: $USER and $SESSION are set up later, do not use them yet!
-     * @throws \core\session\exception
      */
     protected static function check_security() {
         global $CFG;
@@ -524,23 +512,11 @@ class manager {
      * Unblocks the sessions, other scripts may start executing in parallel.
      */
     public static function write_close() {
-        if (version_compare(PHP_VERSION, '5.6.0', '>=')) {
-            // More control over whether session data
-            // is persisted or not.
-            if (self::$sessionactive && session_id()) {
-                // Write session and release lock only if
-                // indication session start was clean.
-                session_write_close();
-            } else {
-                // Otherwise, if possibile lock exists want
-                // to clear it, but do not write session.
-                @session_abort();
-            }
+        if (self::$sessionactive) {
+            session_write_close();
         } else {
-            // Any indication session was started, attempt
-            // to close it.
-            if (self::$sessionactive || session_id()) {
-                session_write_close();
+            if (session_id()) {
+                @session_write_close();
             }
         }
         self::$sessionactive = false;
@@ -772,7 +748,7 @@ class manager {
                 foreach ($authplugins as $authplugin) {
                     /** @var \auth_plugin_base $authplugin*/
                     if ($authplugin->ignore_timeout_hook($user, $user->sid, $user->s_timecreated, $user->s_timemodified)) {
-                        continue 2;
+                        continue;
                     }
                 }
                 self::kill_session($user->sid);
@@ -832,10 +808,9 @@ class manager {
      * Login as another user - no security checks here.
      * @param int $userid
      * @param \context $context
-     * @param bool $generateevent Set to false to prevent the loginas event to be generated
      * @return void
      */
-    public static function loginas($userid, \context $context, $generateevent = true) {
+    public static function loginas($userid, \context $context) {
         global $USER;
 
         if (self::is_loggedinas()) {
@@ -857,27 +832,21 @@ class manager {
         // Let enrol plugins deal with new enrolments if necessary.
         enrol_check_plugins($user);
 
-        if ($generateevent) {
-            // Create event before $USER is updated.
-            $event = \core\event\user_loggedinas::create(
-                array(
-                    'objectid' => $USER->id,
-                    'context' => $context,
-                    'relateduserid' => $userid,
-                    'other' => array(
-                        'originalusername' => fullname($USER, true),
-                        'loggedinasusername' => fullname($user, true)
-                    )
+        // Create event before $USER is updated.
+        $event = \core\event\user_loggedinas::create(
+            array(
+                'objectid' => $USER->id,
+                'context' => $context,
+                'relateduserid' => $userid,
+                'other' => array(
+                    'originalusername' => fullname($USER, true),
+                    'loggedinasusername' => fullname($user, true)
                 )
-            );
-        }
-
+            )
+        );
         // Set up global $USER.
         \core\session\manager::set_user($user);
-
-        if ($generateevent) {
-            $event->trigger();
-        }
+        $event->trigger();
     }
 
     /**
@@ -916,102 +885,4 @@ class manager {
         )));
     }
 
-    /**
-     * Generate a new login token and store it in the session.
-     *
-     * @return array The current login state.
-     */
-    private static function create_login_token() {
-        global $SESSION;
-
-        $state = [
-            'token' => random_string(32),
-            'created' => time() // Server time - not user time.
-        ];
-
-        if (!isset($SESSION->logintoken)) {
-            $SESSION->logintoken = [];
-        }
-
-        // Overwrite any previous values.
-        $SESSION->logintoken[self::$logintokenkey] = $state;
-
-        return $state;
-    }
-
-    /**
-     * Get the current login token or generate a new one.
-     *
-     * All login forms generated from Moodle must include a login token
-     * named "logintoken" with the value being the result of this function.
-     * Logins will be rejected if they do not include this token as well as
-     * the username and password fields.
-     *
-     * @return string The current login token.
-     */
-    public static function get_login_token() {
-        global $CFG, $SESSION;
-
-        $state = false;
-
-        if (!isset($SESSION->logintoken)) {
-            $SESSION->logintoken = [];
-        }
-
-        if (array_key_exists(self::$logintokenkey, $SESSION->logintoken)) {
-            $state = $SESSION->logintoken[self::$logintokenkey];
-        }
-        if (empty($state)) {
-            $state = self::create_login_token();
-        }
-
-        // Check token lifespan.
-        if ($state['created'] < (time() - $CFG->sessiontimeout)) {
-            $state = self::create_login_token();
-        }
-
-        // Return the current session login token.
-        if (array_key_exists('token', $state)) {
-            return $state['token'];
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * Check the submitted value against the stored login token.
-     *
-     * @param mixed $token The value submitted in the login form that we are validating.
-     *                     If false is passed for the token, this function will always return true.
-     * @return boolean If the submitted token is valid.
-     */
-    public static function validate_login_token($token = false) {
-        global $CFG;
-
-        if (!empty($CFG->alternateloginurl) || !empty($CFG->disablelogintoken)) {
-            // An external login page cannot generate the login token we need to protect CSRF on
-            // login requests.
-            // Other custom login workflows may skip this check by setting disablelogintoken in config.
-            return true;
-        }
-        if ($token === false) {
-            // authenticate_user_login is a core function was extended to validate tokens.
-            // For existing uses other than the login form it does not
-            // validate that a token was generated.
-            // Some uses that do not validate the token are login/token.php,
-            // or an auth plugin like auth/ldap/auth.php.
-            return true;
-        }
-
-        $currenttoken = self::get_login_token();
-
-        // We need to clean the login token so the old one is not valid again.
-        self::create_login_token();
-
-        if ($currenttoken !== $token) {
-            // Fail the login.
-            return false;
-        }
-        return true;
-    }
 }

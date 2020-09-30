@@ -37,11 +37,7 @@ class block_html extends block_base {
     }
 
     function specialization() {
-        if (isset($this->config->title)) {
-            $this->title = $this->title = format_string($this->config->title, true, ['context' => $this->context]);
-        } else {
-            $this->title = get_string('newhtmlblock', 'block_html');
-        }
+        $this->title = isset($this->config->title) ? format_string($this->config->title) : format_string(get_string('newhtmlblock', 'block_html'));
     }
 
     function instance_allow_multiple() {

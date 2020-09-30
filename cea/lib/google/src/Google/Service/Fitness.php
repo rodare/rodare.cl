@@ -615,13 +615,9 @@ class Google_Service_Fitness_UsersDataset_Resource extends Google_Service_Resour
 {
 
   /**
-   * Aggregates data of a certain type or stream into buckets divided by a given
-   * type of boundary. Multiple data sets of multiple types and from multiple
-   * sources can be aggreated into exactly one bucket type per request.
    * (dataset.aggregate)
    *
-   * @param string $userId Aggregate data for the person identified. Use me to
-   * indicate the authenticated user. Only me is supported at this time.
+   * @param string $userId
    * @param Google_AggregateRequest $postBody
    * @param array $optParams Optional parameters.
    * @return Google_Service_Fitness_AggregateResponse
@@ -783,6 +779,8 @@ class Google_Service_Fitness_AggregateBy extends Google_Model
   );
   public $dataSourceId;
   public $dataTypeName;
+  public $outputDataSourceId;
+  public $outputDataTypeName;
 
 
   public function setDataSourceId($dataSourceId)
@@ -800,6 +798,22 @@ class Google_Service_Fitness_AggregateBy extends Google_Model
   public function getDataTypeName()
   {
     return $this->dataTypeName;
+  }
+  public function setOutputDataSourceId($outputDataSourceId)
+  {
+    $this->outputDataSourceId = $outputDataSourceId;
+  }
+  public function getOutputDataSourceId()
+  {
+    return $this->outputDataSourceId;
+  }
+  public function setOutputDataTypeName($outputDataTypeName)
+  {
+    $this->outputDataTypeName = $outputDataTypeName;
+  }
+  public function getOutputDataTypeName()
+  {
+    return $this->outputDataTypeName;
   }
 }
 
@@ -1387,23 +1401,6 @@ class Google_Service_Fitness_ListSessionsResponse extends Google_Collection
   }
 }
 
-class Google_Service_Fitness_MapValue extends Google_Model
-{
-  protected $internal_gapi_mappings = array(
-  );
-  public $fpVal;
-
-
-  public function setFpVal($fpVal)
-  {
-    $this->fpVal = $fpVal;
-  }
-  public function getFpVal()
-  {
-    return $this->fpVal;
-  }
-}
-
 class Google_Service_Fitness_Session extends Google_Model
 {
   protected $internal_gapi_mappings = array(
@@ -1494,16 +1491,12 @@ class Google_Service_Fitness_Session extends Google_Model
   }
 }
 
-class Google_Service_Fitness_Value extends Google_Collection
+class Google_Service_Fitness_Value extends Google_Model
 {
-  protected $collection_key = 'mapVal';
   protected $internal_gapi_mappings = array(
   );
   public $fpVal;
   public $intVal;
-  protected $mapValType = 'Google_Service_Fitness_ValueMapValEntry';
-  protected $mapValDataType = 'array';
-  public $stringVal;
 
 
   public function setFpVal($fpVal)
@@ -1521,48 +1514,5 @@ class Google_Service_Fitness_Value extends Google_Collection
   public function getIntVal()
   {
     return $this->intVal;
-  }
-  public function setMapVal($mapVal)
-  {
-    $this->mapVal = $mapVal;
-  }
-  public function getMapVal()
-  {
-    return $this->mapVal;
-  }
-  public function setStringVal($stringVal)
-  {
-    $this->stringVal = $stringVal;
-  }
-  public function getStringVal()
-  {
-    return $this->stringVal;
-  }
-}
-
-class Google_Service_Fitness_ValueMapValEntry extends Google_Model
-{
-  protected $internal_gapi_mappings = array(
-  );
-  public $key;
-  protected $valueType = 'Google_Service_Fitness_MapValue';
-  protected $valueDataType = '';
-
-
-  public function setKey($key)
-  {
-    $this->key = $key;
-  }
-  public function getKey()
-  {
-    return $this->key;
-  }
-  public function setValue(Google_Service_Fitness_MapValue $value)
-  {
-    $this->value = $value;
-  }
-  public function getValue()
-  {
-    return $this->value;
   }
 }

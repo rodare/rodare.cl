@@ -425,8 +425,9 @@ class qformat_default {
 
             $result = question_bank::get_qtype($question->qtype)->save_question_options($question);
 
-            if (isset($question->tags)) {
-                core_tag_tag::set_item_tags('core_question', 'question', $question->id, $question->context, $question->tags);
+            if (!empty($CFG->usetags) && isset($question->tags)) {
+                require_once($CFG->dirroot . '/tag/lib.php');
+                tag_set('question', $question->id, $question->tags, 'core_question', $question->context->id);
             }
 
             if (!empty($result->error)) {
@@ -621,6 +622,9 @@ class qformat_default {
         $question->questiontextformat = FORMAT_MOODLE;
         $question->generalfeedback = '';
         $question->generalfeedbackformat = FORMAT_MOODLE;
+        $question->correctfeedback = '';
+        $question->partiallycorrectfeedback = '';
+        $question->incorrectfeedback = '';
         $question->answernumbering = 'abc';
         $question->penalty = 0.3333333;
         $question->length = 1;
@@ -629,8 +633,6 @@ class qformat_default {
         // to know where the data came from
         $question->export_process = true;
         $question->import_process = true;
-
-        $this->add_blank_combined_feedback($question);
 
         return $question;
     }
@@ -672,21 +674,15 @@ class qformat_default {
      * @return object question
      */
     protected function add_blank_combined_feedback($question) {
-        $question->correctfeedback = [
-            'text' => '',
-            'format' => $question->questiontextformat,
-            'files' => []
-        ];
-        $question->partiallycorrectfeedback = [
-            'text' => '',
-            'format' => $question->questiontextformat,
-            'files' => []
-        ];
-        $question->incorrectfeedback = [
-            'text' => '',
-            'format' => $question->questiontextformat,
-            'files' => []
-        ];
+        $question->correctfeedback['text'] = '';
+        $question->correctfeedback['format'] = $question->questiontextformat;
+        $question->correctfeedback['files'] = array();
+        $question->partiallycorrectfeedback['text'] = '';
+        $question->partiallycorrectfeedback['format'] = $question->questiontextformat;
+        $question->partiallycorrectfeedback['files'] = array();
+        $question->incorrectfeedback['text'] = '';
+        $question->incorrectfeedback['format'] = $question->questiontextformat;
+        $question->incorrectfeedback['files'] = array();
         return $question;
     }
 
@@ -759,13 +755,11 @@ class qformat_default {
     }
 
     /**
-     * Perform the export.
-     * For most types this should not need to be overrided.
-     *
-     * @param   bool    $checkcapabilities Whether to check capabilities when exporting the questions.
-     * @return  string  The content of the export.
+     * Do the export
+     * For most types this should not need to be overrided
+     * @return stored_file
      */
-    public function exportprocess($checkcapabilities = true) {
+    public function exportprocess() {
         global $CFG, $OUTPUT, $DB, $USER;
 
         // get the questions (from database) in this category
@@ -825,7 +819,7 @@ class qformat_default {
             // export the question displaying message
             $count++;
 
-            if (!$checkcapabilities || question_has_capability_on($question, 'view', $question->category)) {
+            if (question_has_capability_on($question, 'view', $question->category)) {
                 $expout .= $this->writequestion($question, $contextid) . "\n";
             }
         }
@@ -945,8 +939,8 @@ class qformat_default {
      * during import to let the user see roughly what is going on.
      */
     protected function format_question_text($question) {
-        return s(question_utils::to_plain_text($question->questiontext,
-                $question->questiontextformat));
+        return question_utils::to_plain_text($question->questiontext,
+                $question->questiontextformat);
     }
 }
 

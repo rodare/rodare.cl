@@ -173,8 +173,7 @@ class XMPPHP_XMPP extends XMPPHP_XMLStream {
 		
 		$out = "<message from=\"{$this->fulljid}\" to=\"$to\" type='$type'>";
 		if($subject) $out .= "<subject>$subject</subject>";
-		$out .= "<body>
-$body</body>";
+		$out .= "<body>$body</body>";
 		if($payload) $out .= $payload;
 		$out .= "</message>";
 		

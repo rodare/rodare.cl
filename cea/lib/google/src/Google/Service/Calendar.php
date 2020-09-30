@@ -903,9 +903,7 @@ class Google_Service_Calendar_Acl_Resource extends Google_Service_Resource
   /**
    * Deletes an access control rule. (acl.delete)
    *
-   * @param string $calendarId Calendar identifier. To retrieve calendar IDs call
-   * the calendarList.list method. If you want to access the primary calendar of
-   * the currently logged in user, use the "primary" keyword.
+   * @param string $calendarId Calendar identifier.
    * @param string $ruleId ACL rule identifier.
    * @param array $optParams Optional parameters.
    */
@@ -919,9 +917,7 @@ class Google_Service_Calendar_Acl_Resource extends Google_Service_Resource
   /**
    * Returns an access control rule. (acl.get)
    *
-   * @param string $calendarId Calendar identifier. To retrieve calendar IDs call
-   * the calendarList.list method. If you want to access the primary calendar of
-   * the currently logged in user, use the "primary" keyword.
+   * @param string $calendarId Calendar identifier.
    * @param string $ruleId ACL rule identifier.
    * @param array $optParams Optional parameters.
    * @return Google_Service_Calendar_AclRule
@@ -936,9 +932,7 @@ class Google_Service_Calendar_Acl_Resource extends Google_Service_Resource
   /**
    * Creates an access control rule. (acl.insert)
    *
-   * @param string $calendarId Calendar identifier. To retrieve calendar IDs call
-   * the calendarList.list method. If you want to access the primary calendar of
-   * the currently logged in user, use the "primary" keyword.
+   * @param string $calendarId Calendar identifier.
    * @param Google_AclRule $postBody
    * @param array $optParams Optional parameters.
    * @return Google_Service_Calendar_AclRule
@@ -953,9 +947,7 @@ class Google_Service_Calendar_Acl_Resource extends Google_Service_Resource
   /**
    * Returns the rules in the access control list for the calendar. (acl.listAcl)
    *
-   * @param string $calendarId Calendar identifier. To retrieve calendar IDs call
-   * the calendarList.list method. If you want to access the primary calendar of
-   * the currently logged in user, use the "primary" keyword.
+   * @param string $calendarId Calendar identifier.
    * @param array $optParams Optional parameters.
    *
    * @opt_param string pageToken Token specifying which result page to return.
@@ -988,9 +980,7 @@ class Google_Service_Calendar_Acl_Resource extends Google_Service_Resource
    * Updates an access control rule. This method supports patch semantics.
    * (acl.patch)
    *
-   * @param string $calendarId Calendar identifier. To retrieve calendar IDs call
-   * the calendarList.list method. If you want to access the primary calendar of
-   * the currently logged in user, use the "primary" keyword.
+   * @param string $calendarId Calendar identifier.
    * @param string $ruleId ACL rule identifier.
    * @param Google_AclRule $postBody
    * @param array $optParams Optional parameters.
@@ -1006,9 +996,7 @@ class Google_Service_Calendar_Acl_Resource extends Google_Service_Resource
   /**
    * Updates an access control rule. (acl.update)
    *
-   * @param string $calendarId Calendar identifier. To retrieve calendar IDs call
-   * the calendarList.list method. If you want to access the primary calendar of
-   * the currently logged in user, use the "primary" keyword.
+   * @param string $calendarId Calendar identifier.
    * @param string $ruleId ACL rule identifier.
    * @param Google_AclRule $postBody
    * @param array $optParams Optional parameters.
@@ -1024,9 +1012,7 @@ class Google_Service_Calendar_Acl_Resource extends Google_Service_Resource
   /**
    * Watch for changes to ACL resources. (acl.watch)
    *
-   * @param string $calendarId Calendar identifier. To retrieve calendar IDs call
-   * the calendarList.list method. If you want to access the primary calendar of
-   * the currently logged in user, use the "primary" keyword.
+   * @param string $calendarId Calendar identifier.
    * @param Google_Channel $postBody
    * @param array $optParams Optional parameters.
    *
@@ -1071,9 +1057,7 @@ class Google_Service_Calendar_CalendarList_Resource extends Google_Service_Resou
   /**
    * Deletes an entry on the user's calendar list. (calendarList.delete)
    *
-   * @param string $calendarId Calendar identifier. To retrieve calendar IDs call
-   * the calendarList.list method. If you want to access the primary calendar of
-   * the currently logged in user, use the "primary" keyword.
+   * @param string $calendarId Calendar identifier.
    * @param array $optParams Optional parameters.
    */
   public function delete($calendarId, $optParams = array())
@@ -1086,9 +1070,7 @@ class Google_Service_Calendar_CalendarList_Resource extends Google_Service_Resou
   /**
    * Returns an entry on the user's calendar list. (calendarList.get)
    *
-   * @param string $calendarId Calendar identifier. To retrieve calendar IDs call
-   * the calendarList.list method. If you want to access the primary calendar of
-   * the currently logged in user, use the "primary" keyword.
+   * @param string $calendarId Calendar identifier.
    * @param array $optParams Optional parameters.
    * @return Google_Service_Calendar_CalendarListEntry
    */
@@ -1159,9 +1141,7 @@ class Google_Service_Calendar_CalendarList_Resource extends Google_Service_Resou
    * Updates an entry on the user's calendar list. This method supports patch
    * semantics. (calendarList.patch)
    *
-   * @param string $calendarId Calendar identifier. To retrieve calendar IDs call
-   * the calendarList.list method. If you want to access the primary calendar of
-   * the currently logged in user, use the "primary" keyword.
+   * @param string $calendarId Calendar identifier.
    * @param Google_CalendarListEntry $postBody
    * @param array $optParams Optional parameters.
    *
@@ -1181,9 +1161,7 @@ class Google_Service_Calendar_CalendarList_Resource extends Google_Service_Resou
   /**
    * Updates an entry on the user's calendar list. (calendarList.update)
    *
-   * @param string $calendarId Calendar identifier. To retrieve calendar IDs call
-   * the calendarList.list method. If you want to access the primary calendar of
-   * the currently logged in user, use the "primary" keyword.
+   * @param string $calendarId Calendar identifier.
    * @param Google_CalendarListEntry $postBody
    * @param array $optParams Optional parameters.
    *
@@ -1254,9 +1232,7 @@ class Google_Service_Calendar_Calendars_Resource extends Google_Service_Resource
    * Clears a primary calendar. This operation deletes all events associated with
    * the primary calendar of an account. (calendars.clear)
    *
-   * @param string $calendarId Calendar identifier. To retrieve calendar IDs call
-   * the calendarList.list method. If you want to access the primary calendar of
-   * the currently logged in user, use the "primary" keyword.
+   * @param string $calendarId Calendar identifier.
    * @param array $optParams Optional parameters.
    */
   public function clear($calendarId, $optParams = array())
@@ -1270,9 +1246,7 @@ class Google_Service_Calendar_Calendars_Resource extends Google_Service_Resource
    * Deletes a secondary calendar. Use calendars.clear for clearing all events on
    * primary calendars. (calendars.delete)
    *
-   * @param string $calendarId Calendar identifier. To retrieve calendar IDs call
-   * the calendarList.list method. If you want to access the primary calendar of
-   * the currently logged in user, use the "primary" keyword.
+   * @param string $calendarId Calendar identifier.
    * @param array $optParams Optional parameters.
    */
   public function delete($calendarId, $optParams = array())
@@ -1285,9 +1259,7 @@ class Google_Service_Calendar_Calendars_Resource extends Google_Service_Resource
   /**
    * Returns metadata for a calendar. (calendars.get)
    *
-   * @param string $calendarId Calendar identifier. To retrieve calendar IDs call
-   * the calendarList.list method. If you want to access the primary calendar of
-   * the currently logged in user, use the "primary" keyword.
+   * @param string $calendarId Calendar identifier.
    * @param array $optParams Optional parameters.
    * @return Google_Service_Calendar_Calendar
    */
@@ -1316,9 +1288,7 @@ class Google_Service_Calendar_Calendars_Resource extends Google_Service_Resource
    * Updates metadata for a calendar. This method supports patch semantics.
    * (calendars.patch)
    *
-   * @param string $calendarId Calendar identifier. To retrieve calendar IDs call
-   * the calendarList.list method. If you want to access the primary calendar of
-   * the currently logged in user, use the "primary" keyword.
+   * @param string $calendarId Calendar identifier.
    * @param Google_Calendar $postBody
    * @param array $optParams Optional parameters.
    * @return Google_Service_Calendar_Calendar
@@ -1333,9 +1303,7 @@ class Google_Service_Calendar_Calendars_Resource extends Google_Service_Resource
   /**
    * Updates metadata for a calendar. (calendars.update)
    *
-   * @param string $calendarId Calendar identifier. To retrieve calendar IDs call
-   * the calendarList.list method. If you want to access the primary calendar of
-   * the currently logged in user, use the "primary" keyword.
+   * @param string $calendarId Calendar identifier.
    * @param Google_Calendar $postBody
    * @param array $optParams Optional parameters.
    * @return Google_Service_Calendar_Calendar
@@ -1412,9 +1380,7 @@ class Google_Service_Calendar_Events_Resource extends Google_Service_Resource
   /**
    * Deletes an event. (events.delete)
    *
-   * @param string $calendarId Calendar identifier. To retrieve calendar IDs call
-   * the calendarList.list method. If you want to access the primary calendar of
-   * the currently logged in user, use the "primary" keyword.
+   * @param string $calendarId Calendar identifier.
    * @param string $eventId Event identifier.
    * @param array $optParams Optional parameters.
    *
@@ -1431,9 +1397,7 @@ class Google_Service_Calendar_Events_Resource extends Google_Service_Resource
   /**
    * Returns an event. (events.get)
    *
-   * @param string $calendarId Calendar identifier. To retrieve calendar IDs call
-   * the calendarList.list method. If you want to access the primary calendar of
-   * the currently logged in user, use the "primary" keyword.
+   * @param string $calendarId Calendar identifier.
    * @param string $eventId Event identifier.
    * @param array $optParams Optional parameters.
    *
@@ -1461,9 +1425,7 @@ class Google_Service_Calendar_Events_Resource extends Google_Service_Resource
    * Imports an event. This operation is used to add a private copy of an existing
    * event to a calendar. (events.import)
    *
-   * @param string $calendarId Calendar identifier. To retrieve calendar IDs call
-   * the calendarList.list method. If you want to access the primary calendar of
-   * the currently logged in user, use the "primary" keyword.
+   * @param string $calendarId Calendar identifier.
    * @param Google_Event $postBody
    * @param array $optParams Optional parameters.
    *
@@ -1481,9 +1443,7 @@ class Google_Service_Calendar_Events_Resource extends Google_Service_Resource
   /**
    * Creates an event. (events.insert)
    *
-   * @param string $calendarId Calendar identifier. To retrieve calendar IDs call
-   * the calendarList.list method. If you want to access the primary calendar of
-   * the currently logged in user, use the "primary" keyword.
+   * @param string $calendarId Calendar identifier.
    * @param Google_Event $postBody
    * @param array $optParams Optional parameters.
    *
@@ -1506,9 +1466,7 @@ class Google_Service_Calendar_Events_Resource extends Google_Service_Resource
   /**
    * Returns instances of the specified recurring event. (events.instances)
    *
-   * @param string $calendarId Calendar identifier. To retrieve calendar IDs call
-   * the calendarList.list method. If you want to access the primary calendar of
-   * the currently logged in user, use the "primary" keyword.
+   * @param string $calendarId Calendar identifier.
    * @param string $eventId Recurring event identifier.
    * @param array $optParams Optional parameters.
    *
@@ -1517,8 +1475,7 @@ class Google_Service_Calendar_Events_Resource extends Google_Service_Resource
    * will still be included if singleEvents is False. Optional. The default is
    * False.
    * @opt_param string timeMax Upper bound (exclusive) for an event's start time
-   * to filter by. Optional. The default is not to filter by start time. Must be
-   * an RFC3339 timestamp with mandatory time zone offset.
+   * to filter by. Optional. The default is not to filter by start time.
    * @opt_param bool alwaysIncludeEmail Whether to always include a value in the
    * email field for the organizer, creator and attendees, even if no real email
    * is available (i.e. a generated, non-working value will be provided). The use
@@ -1531,8 +1488,7 @@ class Google_Service_Calendar_Events_Resource extends Google_Service_Resource
    * @opt_param string pageToken Token specifying which result page to return.
    * Optional.
    * @opt_param string timeMin Lower bound (inclusive) for an event's end time to
-   * filter by. Optional. The default is not to filter by end time. Must be an
-   * RFC3339 timestamp with mandatory time zone offset.
+   * filter by. Optional. The default is not to filter by end time.
    * @opt_param string timeZone Time zone used in the response. Optional. The
    * default is the time zone of the calendar.
    * @opt_param string originalStart The original start time of the instance in
@@ -1552,9 +1508,7 @@ class Google_Service_Calendar_Events_Resource extends Google_Service_Resource
   /**
    * Returns events on the specified calendar. (events.listEvents)
    *
-   * @param string $calendarId Calendar identifier. To retrieve calendar IDs call
-   * the calendarList.list method. If you want to access the primary calendar of
-   * the currently logged in user, use the "primary" keyword.
+   * @param string $calendarId Calendar identifier.
    * @param array $optParams Optional parameters.
    *
    * @opt_param string orderBy The order of the events returned in the result.
@@ -1584,7 +1538,7 @@ class Google_Service_Calendar_Events_Resource extends Google_Service_Resource
    * @opt_param string iCalUID Specifies event ID in the iCalendar format to be
    * included in the response. Optional.
    * @opt_param string updatedMin Lower bound for an event's last modification
-   * time (as a RFC3339 timestamp) to filter by. When specified, entries deleted
+   * time (as a RFC 3339 timestamp) to filter by. When specified, entries deleted
    * since this time will always be included regardless of showDeleted. Optional.
    * The default is not to filter by last modification time.
    * @opt_param bool singleEvents Whether to expand recurring events into
@@ -1592,10 +1546,7 @@ class Google_Service_Calendar_Events_Resource extends Google_Service_Resource
    * events, but not the underlying recurring events themselves. Optional. The
    * default is False.
    * @opt_param string timeMax Upper bound (exclusive) for an event's start time
-   * to filter by. Optional. The default is not to filter by start time. Must be
-   * an RFC3339 timestamp with mandatory time zone offset, e.g.,
-   * 2011-06-03T10:00:00-07:00, 2011-06-03T10:00:00Z. Milliseconds may be provided
-   * but will be ignored.
+   * to filter by. Optional. The default is not to filter by start time.
    * @opt_param bool alwaysIncludeEmail Whether to always include a value in the
    * email field for the organizer, creator and attendees, even if no real email
    * is available (i.e. a generated, non-working value will be provided). The use
@@ -1610,10 +1561,7 @@ class Google_Service_Calendar_Events_Resource extends Google_Service_Resource
    * @opt_param string pageToken Token specifying which result page to return.
    * Optional.
    * @opt_param string timeMin Lower bound (inclusive) for an event's end time to
-   * filter by. Optional. The default is not to filter by end time. Must be an
-   * RFC3339 timestamp with mandatory time zone offset, e.g.,
-   * 2011-06-03T10:00:00-07:00, 2011-06-03T10:00:00Z. Milliseconds may be provided
-   * but will be ignored.
+   * filter by. Optional. The default is not to filter by end time.
    * @opt_param string timeZone Time zone used in the response. Optional. The
    * default is the time zone of the calendar.
    * @opt_param string privateExtendedProperty Extended properties constraint
@@ -1661,9 +1609,7 @@ class Google_Service_Calendar_Events_Resource extends Google_Service_Resource
   /**
    * Updates an event. This method supports patch semantics. (events.patch)
    *
-   * @param string $calendarId Calendar identifier. To retrieve calendar IDs call
-   * the calendarList.list method. If you want to access the primary calendar of
-   * the currently logged in user, use the "primary" keyword.
+   * @param string $calendarId Calendar identifier.
    * @param string $eventId Event identifier.
    * @param Google_Event $postBody
    * @param array $optParams Optional parameters.
@@ -1694,9 +1640,7 @@ class Google_Service_Calendar_Events_Resource extends Google_Service_Resource
   /**
    * Creates an event based on a simple text string. (events.quickAdd)
    *
-   * @param string $calendarId Calendar identifier. To retrieve calendar IDs call
-   * the calendarList.list method. If you want to access the primary calendar of
-   * the currently logged in user, use the "primary" keyword.
+   * @param string $calendarId Calendar identifier.
    * @param string $text The text describing the event to be created.
    * @param array $optParams Optional parameters.
    *
@@ -1714,9 +1658,7 @@ class Google_Service_Calendar_Events_Resource extends Google_Service_Resource
   /**
    * Updates an event. (events.update)
    *
-   * @param string $calendarId Calendar identifier. To retrieve calendar IDs call
-   * the calendarList.list method. If you want to access the primary calendar of
-   * the currently logged in user, use the "primary" keyword.
+   * @param string $calendarId Calendar identifier.
    * @param string $eventId Event identifier.
    * @param Google_Event $postBody
    * @param array $optParams Optional parameters.
@@ -1747,9 +1689,7 @@ class Google_Service_Calendar_Events_Resource extends Google_Service_Resource
   /**
    * Watch for changes to Events resources. (events.watch)
    *
-   * @param string $calendarId Calendar identifier. To retrieve calendar IDs call
-   * the calendarList.list method. If you want to access the primary calendar of
-   * the currently logged in user, use the "primary" keyword.
+   * @param string $calendarId Calendar identifier.
    * @param Google_Channel $postBody
    * @param array $optParams Optional parameters.
    *
@@ -1780,7 +1720,7 @@ class Google_Service_Calendar_Events_Resource extends Google_Service_Resource
    * @opt_param string iCalUID Specifies event ID in the iCalendar format to be
    * included in the response. Optional.
    * @opt_param string updatedMin Lower bound for an event's last modification
-   * time (as a RFC3339 timestamp) to filter by. When specified, entries deleted
+   * time (as a RFC 3339 timestamp) to filter by. When specified, entries deleted
    * since this time will always be included regardless of showDeleted. Optional.
    * The default is not to filter by last modification time.
    * @opt_param bool singleEvents Whether to expand recurring events into
@@ -1788,10 +1728,7 @@ class Google_Service_Calendar_Events_Resource extends Google_Service_Resource
    * events, but not the underlying recurring events themselves. Optional. The
    * default is False.
    * @opt_param string timeMax Upper bound (exclusive) for an event's start time
-   * to filter by. Optional. The default is not to filter by start time. Must be
-   * an RFC3339 timestamp with mandatory time zone offset, e.g.,
-   * 2011-06-03T10:00:00-07:00, 2011-06-03T10:00:00Z. Milliseconds may be provided
-   * but will be ignored.
+   * to filter by. Optional. The default is not to filter by start time.
    * @opt_param bool alwaysIncludeEmail Whether to always include a value in the
    * email field for the organizer, creator and attendees, even if no real email
    * is available (i.e. a generated, non-working value will be provided). The use
@@ -1806,10 +1743,7 @@ class Google_Service_Calendar_Events_Resource extends Google_Service_Resource
    * @opt_param string pageToken Token specifying which result page to return.
    * Optional.
    * @opt_param string timeMin Lower bound (inclusive) for an event's end time to
-   * filter by. Optional. The default is not to filter by end time. Must be an
-   * RFC3339 timestamp with mandatory time zone offset, e.g.,
-   * 2011-06-03T10:00:00-07:00, 2011-06-03T10:00:00Z. Milliseconds may be provided
-   * but will be ignored.
+   * filter by. Optional. The default is not to filter by end time.
    * @opt_param string timeZone Time zone used in the response. Optional. The
    * default is the time zone of the calendar.
    * @opt_param string privateExtendedProperty Extended properties constraint
@@ -2985,21 +2919,12 @@ class Google_Service_Calendar_EventAttachment extends Google_Model
 {
   protected $internal_gapi_mappings = array(
   );
-  public $fileId;
   public $fileUrl;
   public $iconLink;
   public $mimeType;
   public $title;
 
 
-  public function setFileId($fileId)
-  {
-    $this->fileId = $fileId;
-  }
-  public function getFileId()
-  {
-    return $this->fileId;
-  }
   public function setFileUrl($fileUrl)
   {
     $this->fileUrl = $fileUrl;

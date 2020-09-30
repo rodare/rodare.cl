@@ -366,11 +366,7 @@ function has_capability($capability, context $context, $user = null, $doanything
     global $USER, $CFG, $SCRIPT, $ACCESSLIB_PRIVATE;
 
     if (during_initial_install()) {
-        if ($SCRIPT === "/$CFG->admin/index.php"
-                or $SCRIPT === "/$CFG->admin/cli/install.php"
-                or $SCRIPT === "/$CFG->admin/cli/install_database.php"
-                or (defined('BEHAT_UTIL') and BEHAT_UTIL)
-                or (defined('PHPUNIT_UTIL') and PHPUNIT_UTIL)) {
+        if ($SCRIPT === "/$CFG->admin/index.php" or $SCRIPT === "/$CFG->admin/cli/install.php" or $SCRIPT === "/$CFG->admin/cli/install_database.php") {
             // we are in an installer - roles can not work yet
             return true;
         } else {
@@ -984,17 +980,20 @@ function load_course_context($userid, context_course $coursecontext, &$accessdat
     }
 
     // now get overrides of interesting roles in all interesting contexts (this course + children + parents)
-    $params = array('pathprefix' => $coursecontext->path . '/%');
+    $params = array('c'=>$coursecontext->id);
     list($parentsaself, $rparams) = $DB->get_in_or_equal($coursecontext->get_parent_context_ids(true), SQL_PARAMS_NAMED, 'pc_');
     $params = array_merge($params, $rparams);
     list($roleids, $rparams) = $DB->get_in_or_equal($roles, SQL_PARAMS_NAMED, 'r_');
     $params = array_merge($params, $rparams);
 
     $sql = "SELECT ctx.path, rc.roleid, rc.capability, rc.permission
-                 FROM {context} ctx
-                 JOIN {role_capabilities} rc ON rc.contextid = ctx.id
+                 FROM {role_capabilities} rc
+                 JOIN {context} ctx
+                      ON (ctx.id = rc.contextid)
+                 JOIN {context} cctx
+                      ON (cctx.id = :c
+                          AND (ctx.id $parentsaself OR ctx.path LIKE ".$DB->sql_concat('cctx.path',"'/%'")."))
                 WHERE rc.roleid $roleids
-                  AND (ctx.id $parentsaself OR ctx.path LIKE :pathprefix)
              ORDER BY rc.capability"; // fixed capability order is necessary for rdef dedupe
     $rs = $DB->get_recordset_sql($sql, $params);
 
@@ -2040,6 +2039,98 @@ function is_viewing(context $context, $user = null, $withcapability = '') {
 }
 
 /**
+ * Returns true if user is enrolled (is participating) in course
+ * this is intended for students and teachers.
+ *
+ * Since 2.2 the result for active enrolments and current user are cached.
+ *
+ * @package   core_enrol
+ * @category  access
+ *
+ * @param context $context
+ * @param int|stdClass $user if null $USER is used, otherwise user object or id expected
+ * @param string $withcapability extra capability name
+ * @param bool $onlyactive consider only active enrolments in enabled plugins and time restrictions
+ * @return bool
+ */
+function is_enrolled(context $context, $user = null, $withcapability = '', $onlyactive = false) {
+    global $USER, $DB;
+
+    // first find the course context
+    $coursecontext = $context->get_course_context();
+
+    // make sure there is a real user specified
+    if ($user === null) {
+        $userid = isset($USER->id) ? $USER->id : 0;
+    } else {
+        $userid = is_object($user) ? $user->id : $user;
+    }
+
+    if (empty($userid)) {
+        // not-logged-in!
+        return false;
+    } else if (isguestuser($userid)) {
+        // guest account can not be enrolled anywhere
+        return false;
+    }
+
+    if ($coursecontext->instanceid == SITEID) {
+        // everybody participates on frontpage
+    } else {
+        // try cached info first - the enrolled flag is set only when active enrolment present
+        if ($USER->id == $userid) {
+            $coursecontext->reload_if_dirty();
+            if (isset($USER->enrol['enrolled'][$coursecontext->instanceid])) {
+                if ($USER->enrol['enrolled'][$coursecontext->instanceid] > time()) {
+                    if ($withcapability and !has_capability($withcapability, $context, $userid)) {
+                        return false;
+                    }
+                    return true;
+                }
+            }
+        }
+
+        if ($onlyactive) {
+            // look for active enrolments only
+            $until = enrol_get_enrolment_end($coursecontext->instanceid, $userid);
+
+            if ($until === false) {
+                return false;
+            }
+
+            if ($USER->id == $userid) {
+                if ($until == 0) {
+                    $until = ENROL_MAX_TIMESTAMP;
+                }
+                $USER->enrol['enrolled'][$coursecontext->instanceid] = $until;
+                if (isset($USER->enrol['tempguest'][$coursecontext->instanceid])) {
+                    unset($USER->enrol['tempguest'][$coursecontext->instanceid]);
+                    remove_temp_course_roles($coursecontext);
+                }
+            }
+
+        } else {
+            // any enrolment is good for us here, even outdated, disabled or inactive
+            $sql = "SELECT 'x'
+                      FROM {user_enrolments} ue
+                      JOIN {enrol} e ON (e.id = ue.enrolid AND e.courseid = :courseid)
+                      JOIN {user} u ON u.id = ue.userid
+                     WHERE ue.userid = :userid AND u.deleted = 0";
+            $params = array('userid'=>$userid, 'courseid'=>$coursecontext->instanceid);
+            if (!$DB->record_exists_sql($sql, $params)) {
+                return false;
+            }
+        }
+    }
+
+    if ($withcapability and !has_capability($withcapability, $context, $userid)) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
  * Returns true if the user is able to access the course.
  *
  * This function is in no way, shape, or form a substitute for require_login.
@@ -2154,6 +2245,259 @@ function can_access_course(stdClass $course, $user = null, $withcapability = '',
     }
 
     return false;
+}
+
+/**
+ * Returns array with sql code and parameters returning all ids
+ * of users enrolled into course.
+ *
+ * This function is using 'eu[0-9]+_' prefix for table names and parameters.
+ *
+ * @package   core_enrol
+ * @category  access
+ *
+ * @param context $context
+ * @param string $withcapability
+ * @param int $groupid 0 means ignore groups, any other value limits the result by group id
+ * @param bool $onlyactive consider only active enrolments in enabled plugins and time restrictions
+ * @param bool $onlysuspended inverse of onlyactive, consider only suspended enrolments
+ * @return array list($sql, $params)
+ */
+function get_enrolled_sql(context $context, $withcapability = '', $groupid = 0, $onlyactive = false, $onlysuspended = false) {
+    global $DB, $CFG;
+
+    // use unique prefix just in case somebody makes some SQL magic with the result
+    static $i = 0;
+    $i++;
+    $prefix = 'eu'.$i.'_';
+
+    // first find the course context
+    $coursecontext = $context->get_course_context();
+
+    $isfrontpage = ($coursecontext->instanceid == SITEID);
+
+    if ($onlyactive && $onlysuspended) {
+        throw new coding_exception("Both onlyactive and onlysuspended are set, this is probably not what you want!");
+    }
+    if ($isfrontpage && $onlysuspended) {
+        throw new coding_exception("onlysuspended is not supported on frontpage; please add your own early-exit!");
+    }
+
+    $joins  = array();
+    $wheres = array();
+    $params = array();
+
+    list($contextids, $contextpaths) = get_context_info_list($context);
+
+    // get all relevant capability info for all roles
+    if ($withcapability) {
+        list($incontexts, $cparams) = $DB->get_in_or_equal($contextids, SQL_PARAMS_NAMED, 'ctx');
+        $cparams['cap'] = $withcapability;
+
+        $defs = array();
+        $sql = "SELECT rc.id, rc.roleid, rc.permission, ctx.path
+                  FROM {role_capabilities} rc
+                  JOIN {context} ctx on rc.contextid = ctx.id
+                 WHERE rc.contextid $incontexts AND rc.capability = :cap";
+        $rcs = $DB->get_records_sql($sql, $cparams);
+        foreach ($rcs as $rc) {
+            $defs[$rc->path][$rc->roleid] = $rc->permission;
+        }
+
+        $access = array();
+        if (!empty($defs)) {
+            foreach ($contextpaths as $path) {
+                if (empty($defs[$path])) {
+                    continue;
+                }
+                foreach($defs[$path] as $roleid => $perm) {
+                    if ($perm == CAP_PROHIBIT) {
+                        $access[$roleid] = CAP_PROHIBIT;
+                        continue;
+                    }
+                    if (!isset($access[$roleid])) {
+                        $access[$roleid] = (int)$perm;
+                    }
+                }
+            }
+        }
+
+        unset($defs);
+
+        // make lists of roles that are needed and prohibited
+        $needed     = array(); // one of these is enough
+        $prohibited = array(); // must not have any of these
+        foreach ($access as $roleid => $perm) {
+            if ($perm == CAP_PROHIBIT) {
+                unset($needed[$roleid]);
+                $prohibited[$roleid] = true;
+            } else if ($perm == CAP_ALLOW and empty($prohibited[$roleid])) {
+                $needed[$roleid] = true;
+            }
+        }
+
+        $defaultuserroleid      = isset($CFG->defaultuserroleid) ? $CFG->defaultuserroleid : 0;
+        $defaultfrontpageroleid = isset($CFG->defaultfrontpageroleid) ? $CFG->defaultfrontpageroleid : 0;
+
+        $nobody = false;
+
+        if ($isfrontpage) {
+            if (!empty($prohibited[$defaultuserroleid]) or !empty($prohibited[$defaultfrontpageroleid])) {
+                $nobody = true;
+            } else if (!empty($needed[$defaultuserroleid]) or !empty($needed[$defaultfrontpageroleid])) {
+                // everybody not having prohibit has the capability
+                $needed = array();
+            } else if (empty($needed)) {
+                $nobody = true;
+            }
+        } else {
+            if (!empty($prohibited[$defaultuserroleid])) {
+                $nobody = true;
+            } else if (!empty($needed[$defaultuserroleid])) {
+                // everybody not having prohibit has the capability
+                $needed = array();
+            } else if (empty($needed)) {
+                $nobody = true;
+            }
+        }
+
+        if ($nobody) {
+            // nobody can match so return some SQL that does not return any results
+            $wheres[] = "1 = 2";
+
+        } else {
+
+            if ($needed) {
+                $ctxids = implode(',', $contextids);
+                $roleids = implode(',', array_keys($needed));
+                $joins[] = "JOIN {role_assignments} {$prefix}ra3 ON ({$prefix}ra3.userid = {$prefix}u.id AND {$prefix}ra3.roleid IN ($roleids) AND {$prefix}ra3.contextid IN ($ctxids))";
+            }
+
+            if ($prohibited) {
+                $ctxids = implode(',', $contextids);
+                $roleids = implode(',', array_keys($prohibited));
+                $joins[] = "LEFT JOIN {role_assignments} {$prefix}ra4 ON ({$prefix}ra4.userid = {$prefix}u.id AND {$prefix}ra4.roleid IN ($roleids) AND {$prefix}ra4.contextid IN ($ctxids))";
+                $wheres[] = "{$prefix}ra4.id IS NULL";
+            }
+
+            if ($groupid) {
+                $joins[] = "JOIN {groups_members} {$prefix}gm ON ({$prefix}gm.userid = {$prefix}u.id AND {$prefix}gm.groupid = :{$prefix}gmid)";
+                $params["{$prefix}gmid"] = $groupid;
+            }
+        }
+
+    } else {
+        if ($groupid) {
+            $joins[] = "JOIN {groups_members} {$prefix}gm ON ({$prefix}gm.userid = {$prefix}u.id AND {$prefix}gm.groupid = :{$prefix}gmid)";
+            $params["{$prefix}gmid"] = $groupid;
+        }
+    }
+
+    $wheres[] = "{$prefix}u.deleted = 0 AND {$prefix}u.id <> :{$prefix}guestid";
+    $params["{$prefix}guestid"] = $CFG->siteguest;
+
+    if ($isfrontpage) {
+        // all users are "enrolled" on the frontpage
+    } else {
+        $where1 = "{$prefix}ue.status = :{$prefix}active AND {$prefix}e.status = :{$prefix}enabled";
+        $where2 = "{$prefix}ue.timestart < :{$prefix}now1 AND ({$prefix}ue.timeend = 0 OR {$prefix}ue.timeend > :{$prefix}now2)";
+        $ejoin = "JOIN {enrol} {$prefix}e ON ({$prefix}e.id = {$prefix}ue.enrolid AND {$prefix}e.courseid = :{$prefix}courseid)";
+        $params[$prefix.'courseid'] = $coursecontext->instanceid;
+
+        if (!$onlysuspended) {
+            $joins[] = "JOIN {user_enrolments} {$prefix}ue ON {$prefix}ue.userid = {$prefix}u.id";
+            $joins[] = $ejoin;
+            if ($onlyactive) {
+                $wheres[] = "$where1 AND $where2";
+            }
+        } else {
+            // Suspended only where there is enrolment but ALL are suspended.
+            // Consider multiple enrols where one is not suspended or plain role_assign.
+            $enrolselect = "SELECT DISTINCT {$prefix}ue.userid FROM {user_enrolments} {$prefix}ue $ejoin WHERE $where1 AND $where2";
+            $joins[] = "JOIN {user_enrolments} {$prefix}ue1 ON {$prefix}ue1.userid = {$prefix}u.id";
+            $joins[] = "JOIN {enrol} {$prefix}e1 ON ({$prefix}e1.id = {$prefix}ue1.enrolid AND {$prefix}e1.courseid = :{$prefix}_e1_courseid)";
+            $params["{$prefix}_e1_courseid"] = $coursecontext->instanceid;
+            $wheres[] = "{$prefix}u.id NOT IN ($enrolselect)";
+        }
+
+        if ($onlyactive || $onlysuspended) {
+            $now = round(time(), -2); // rounding helps caching in DB
+            $params = array_merge($params, array($prefix.'enabled'=>ENROL_INSTANCE_ENABLED,
+                                                 $prefix.'active'=>ENROL_USER_ACTIVE,
+                                                 $prefix.'now1'=>$now, $prefix.'now2'=>$now));
+        }
+    }
+
+    $joins = implode("\n", $joins);
+    $wheres = "WHERE ".implode(" AND ", $wheres);
+
+    $sql = "SELECT DISTINCT {$prefix}u.id
+              FROM {user} {$prefix}u
+            $joins
+           $wheres";
+
+    return array($sql, $params);
+}
+
+/**
+ * Returns list of users enrolled into course.
+ *
+ * @package   core_enrol
+ * @category  access
+ *
+ * @param context $context
+ * @param string $withcapability
+ * @param int $groupid 0 means ignore groups, any other value limits the result by group id
+ * @param string $userfields requested user record fields
+ * @param string $orderby
+ * @param int $limitfrom return a subset of records, starting at this point (optional, required if $limitnum is set).
+ * @param int $limitnum return a subset comprising this many records (optional, required if $limitfrom is set).
+ * @param bool $onlyactive consider only active enrolments in enabled plugins and time restrictions
+ * @return array of user records
+ */
+function get_enrolled_users(context $context, $withcapability = '', $groupid = 0, $userfields = 'u.*', $orderby = null,
+        $limitfrom = 0, $limitnum = 0, $onlyactive = false) {
+    global $DB;
+
+    list($esql, $params) = get_enrolled_sql($context, $withcapability, $groupid, $onlyactive);
+    $sql = "SELECT $userfields
+              FROM {user} u
+              JOIN ($esql) je ON je.id = u.id
+             WHERE u.deleted = 0";
+
+    if ($orderby) {
+        $sql = "$sql ORDER BY $orderby";
+    } else {
+        list($sort, $sortparams) = users_order_by_sql('u');
+        $sql = "$sql ORDER BY $sort";
+        $params = array_merge($params, $sortparams);
+    }
+
+    return $DB->get_records_sql($sql, $params, $limitfrom, $limitnum);
+}
+
+/**
+ * Counts list of users enrolled into course (as per above function)
+ *
+ * @package   core_enrol
+ * @category  access
+ *
+ * @param context $context
+ * @param string $withcapability
+ * @param int $groupid 0 means ignore groups, any other value limits the result by group id
+ * @param bool $onlyactive consider only active enrolments in enabled plugins and time restrictions
+ * @return array of user records
+ */
+function count_enrolled_users(context $context, $withcapability = '', $groupid = 0, $onlyactive = false) {
+    global $DB;
+
+    list($esql, $params) = get_enrolled_sql($context, $withcapability, $groupid, $onlyactive);
+    $sql = "SELECT count(u.id)
+              FROM {user} u
+              JOIN ($esql) je ON je.id = u.id
+             WHERE u.deleted = 0";
+
+    return $DB->count_records_sql($sql, $params);
 }
 
 /**
@@ -2743,28 +3087,20 @@ function get_component_string($component, $contextlevel) {
 
 /**
  * Gets the list of roles assigned to this context and up (parents)
- * from the aggregation of:
- * a) the list of roles that are visible on user profile page and participants page (profileroles setting) and;
- * b) if applicable, those roles that are assigned in the context.
+ * from the list of roles that are visible on user profile page
+ * and participants page.
  *
  * @param context $context
  * @return array
  */
 function get_profile_roles(context $context) {
     global $CFG, $DB;
-    // If the current user can assign roles, then they can see all roles on the profile and participants page,
-    // provided the roles are assigned to at least 1 user in the context. If not, only the policy-defined roles.
-    if (has_capability('moodle/role:assign', $context)) {
-        $rolesinscope = array_keys(get_all_roles($context));
-    } else {
-        $rolesinscope = empty($CFG->profileroles) ? [] : array_map('trim', explode(',', $CFG->profileroles));
+
+    if (empty($CFG->profileroles)) {
+        return array();
     }
 
-    if (empty($rolesinscope)) {
-        return [];
-    }
-
-    list($rallowed, $params) = $DB->get_in_or_equal($rolesinscope, SQL_PARAMS_NAMED, 'a');
+    list($rallowed, $params) = $DB->get_in_or_equal(explode(',', $CFG->profileroles), SQL_PARAMS_NAMED, 'a');
     list($contextlist, $cparams) = $DB->get_in_or_equal($context->get_parent_context_ids(true), SQL_PARAMS_NAMED, 'p');
     $params = array_merge($params, $cparams);
 
@@ -2823,23 +3159,18 @@ function get_roles_used_in_context(context $context) {
  */
 function get_user_roles_in_course($userid, $courseid) {
     global $CFG, $DB;
+
+    if (empty($CFG->profileroles)) {
+        return '';
+    }
+
     if ($courseid == SITEID) {
         $context = context_system::instance();
     } else {
         $context = context_course::instance($courseid);
     }
-    // If the current user can assign roles, then they can see all roles on the profile and participants page,
-    // provided the roles are assigned to at least 1 user in the context. If not, only the policy-defined roles.
-    if (has_capability('moodle/role:assign', $context)) {
-        $rolesinscope = array_keys(get_all_roles($context));
-    } else {
-        $rolesinscope = empty($CFG->profileroles) ? [] : array_map('trim', explode(',', $CFG->profileroles));
-    }
-    if (empty($rolesinscope)) {
-        return '';
-    }
 
-    list($rallowed, $params) = $DB->get_in_or_equal($rolesinscope, SQL_PARAMS_NAMED, 'a');
+    list($rallowed, $params) = $DB->get_in_or_equal(explode(',', $CFG->profileroles), SQL_PARAMS_NAMED, 'a');
     list($contextlist, $cparams) = $DB->get_in_or_equal($context->get_parent_context_ids(true), SQL_PARAMS_NAMED, 'p');
     $params = array_merge($params, $cparams);
 
@@ -3181,11 +3512,6 @@ function get_assignable_roles(context $context, $rolenamedisplay = ROLENAME_ALIA
  */
 function get_switchable_roles(context $context) {
     global $USER, $DB;
-
-    // You can't switch roles without this capability.
-    if (!has_capability('moodle/role:switchroles', $context)) {
-        return [];
-    }
 
     $params = array();
     $extrajoins = '';
@@ -3662,13 +3988,9 @@ function get_users_by_capability(context $context, $capability, $fields = '', $s
                 } else {
                     $unions[] = "SELECT userid
                                    FROM {role_assignments}
-                                  WHERE contextid IN ($ctxids) AND roleid IN (".implode(',', array_keys($needed[$cap])) .")
-                                        AND userid NOT IN (
-                                            SELECT userid
-                                              FROM {role_assignments}
-                                             WHERE contextid IN ($ctxids)
-                                                    AND roleid IN (" . implode(',', array_keys($prohibited[$cap])) . ")
-                                                        )";
+                                  WHERE contextid IN ($ctxids)
+                                        AND roleid IN (".implode(',', array_keys($needed[$cap])) .")
+                                        AND roleid NOT IN (".implode(',', array_keys($prohibited[$cap])) .")";
                 }
             }
         }
@@ -3788,7 +4110,8 @@ function sort_by_roleassignment_authority($users, context $context, $roles = arr
  * system is more flexible. If you really need, you can to use this
  * function but consider has_capability() as a possible substitute.
  *
- * All $sort fields are added into $fields if not present there yet.
+ * The caller function is responsible for including all the
+ * $sort fields in $fields param.
  *
  * If $roleid is an array or is empty (all roles) you need to set $fields
  * (and $sort by extension) params according to it, as the first field
@@ -3886,41 +4209,6 @@ function get_role_users($roleid, context $context, $parent = false, $fields = ''
         $params = array_merge($params, $sortparams);
     }
 
-    // Adding the fields from $sort that are not present in $fields.
-    $sortarray = preg_split('/,\s*/', $sort);
-    $fieldsarray = preg_split('/,\s*/', $fields);
-
-    // Discarding aliases from the fields.
-    $fieldnames = array();
-    foreach ($fieldsarray as $key => $field) {
-        list($fieldnames[$key]) = explode(' ', $field);
-    }
-
-    $addedfields = array();
-    foreach ($sortarray as $sortfield) {
-        // Throw away any additional arguments to the sort (e.g. ASC/DESC).
-        list($sortfield) = explode(' ', $sortfield);
-        list($tableprefix) = explode('.', $sortfield);
-        $fieldpresent = false;
-        foreach ($fieldnames as $fieldname) {
-            if ($fieldname === $sortfield || $fieldname === $tableprefix.'.*') {
-                $fieldpresent = true;
-                break;
-            }
-        }
-
-        if (!$fieldpresent) {
-            $fieldsarray[] = $sortfield;
-            $addedfields[] = $sortfield;
-        }
-    }
-
-    $fields = implode(', ', $fieldsarray);
-    if (!empty($addedfields)) {
-        $addedfields = implode(', ', $addedfields);
-        debugging('get_role_users() adding '.$addedfields.' to the query result because they were required by $sort but missing in $fields');
-    }
-
     if ($all === null) {
         // Previously null was used to indicate that parameter was not used.
         $all = true;
@@ -3999,26 +4287,20 @@ function count_role_users($roleid, context $context, $parent = false) {
  * @param int $userid User ID or null for current user
  * @param bool $doanything True if 'doanything' is permitted (default)
  * @param string $fieldsexceptid Leave blank if you only need 'id' in the course records;
- *   otherwise use a comma-separated list of the fields you require, not including id.
- *   Add ctxid, ctxpath, ctxdepth etc to return course context information for preloading.
+ *   otherwise use a comma-separated list of the fields you require, not including id
  * @param string $orderby If set, use a comma-separated list of fields from course
  *   table with sql modifiers (DESC) if needed
- * @param int $limit Limit the number of courses to return on success. Zero equals all entries.
  * @return array|bool Array of courses, if none found false is returned.
  */
-function get_user_capability_course($capability, $userid = null, $doanything = true, $fieldsexceptid = '', $orderby = '',
-        $limit = 0) {
+function get_user_capability_course($capability, $userid = null, $doanything = true, $fieldsexceptid = '', $orderby = '') {
     global $DB;
 
     // Convert fields list and ordering
     $fieldlist = '';
     if ($fieldsexceptid) {
-        $fields = array_map('trim', explode(',', $fieldsexceptid));
+        $fields = explode(',', $fieldsexceptid);
         foreach($fields as $field) {
-            // Context fields have a different alias and are added further down.
-            if (strpos($field, 'ctx') !== 0) {
-                $fieldlist .= ',c.'.$field;
-            }
+            $fieldlist .= ',c.'.$field;
         }
     }
     if ($orderby) {
@@ -4039,13 +4321,6 @@ function get_user_capability_course($capability, $userid = null, $doanything = t
 
     $contextpreload = context_helper::get_preload_record_columns_sql('x');
 
-    $contextlist = ['ctxid', 'ctxpath', 'ctxdepth', 'ctxlevel', 'ctxinstance'];
-    $unsetitems = $contextlist;
-    if ($fieldsexceptid) {
-        $coursefields = array_map('trim', explode(',', $fieldsexceptid));
-        $unsetitems = array_diff($contextlist, $coursefields);
-    }
-
     $courses = array();
     $rs = $DB->get_recordset_sql("SELECT c.id $fieldlist, $contextpreload
                                     FROM {course} c
@@ -4053,23 +4328,12 @@ function get_user_capability_course($capability, $userid = null, $doanything = t
                                 $orderby");
     // Check capability for each course in turn
     foreach ($rs as $course) {
-        // The preload_from_record() unsets the context related fields, but it is possible that our caller may
-        // want them returned too (so they can use them for their own context preloading). For that reason we
-        // pass a clone.
-        context_helper::preload_from_record(clone($course));
+        context_helper::preload_from_record($course);
         $context = context_course::instance($course->id);
         if (has_capability($capability, $context, $userid, $doanything)) {
-            // Unset context fields if they were not asked for.
-            foreach ($unsetitems as $item) {
-                unset($course->$item);
-            }
             // We've got the capability. Make the record look like a course record
             // and store it
             $courses[] = $course;
-            $limit--;
-            if ($limit == 0) {
-                break;
-            }
         }
     }
     $rs->close();
@@ -5958,7 +6222,7 @@ class context_system extends context {
      * Returns system context instance.
      *
      * @static
-     * @param int $instanceid should be 0
+     * @param int $instanceid
      * @param int $strictness
      * @param bool $cache
      * @return context_system context instance
@@ -6210,19 +6474,19 @@ class context_user extends context {
      * Returns user context instance.
      *
      * @static
-     * @param int $userid id from {user} table
+     * @param int $instanceid
      * @param int $strictness
      * @return context_user context instance
      */
-    public static function instance($userid, $strictness = MUST_EXIST) {
+    public static function instance($instanceid, $strictness = MUST_EXIST) {
         global $DB;
 
-        if ($context = context::cache_get(CONTEXT_USER, $userid)) {
+        if ($context = context::cache_get(CONTEXT_USER, $instanceid)) {
             return $context;
         }
 
-        if (!$record = $DB->get_record('context', array('contextlevel' => CONTEXT_USER, 'instanceid' => $userid))) {
-            if ($user = $DB->get_record('user', array('id' => $userid, 'deleted' => 0), 'id', $strictness)) {
+        if (!$record = $DB->get_record('context', array('contextlevel'=>CONTEXT_USER, 'instanceid'=>$instanceid))) {
+            if ($user = $DB->get_record('user', array('id'=>$instanceid, 'deleted'=>0), 'id', $strictness)) {
                 $record = context::insert_context_record(CONTEXT_USER, $user->id, '/'.SYSCONTEXTID, 0);
             }
         }
@@ -6388,19 +6652,19 @@ class context_coursecat extends context {
      * Returns course category context instance.
      *
      * @static
-     * @param int $categoryid id from {course_categories} table
+     * @param int $instanceid
      * @param int $strictness
      * @return context_coursecat context instance
      */
-    public static function instance($categoryid, $strictness = MUST_EXIST) {
+    public static function instance($instanceid, $strictness = MUST_EXIST) {
         global $DB;
 
-        if ($context = context::cache_get(CONTEXT_COURSECAT, $categoryid)) {
+        if ($context = context::cache_get(CONTEXT_COURSECAT, $instanceid)) {
             return $context;
         }
 
-        if (!$record = $DB->get_record('context', array('contextlevel' => CONTEXT_COURSECAT, 'instanceid' => $categoryid))) {
-            if ($category = $DB->get_record('course_categories', array('id' => $categoryid), 'id,parent', $strictness)) {
+        if (!$record = $DB->get_record('context', array('contextlevel'=>CONTEXT_COURSECAT, 'instanceid'=>$instanceid))) {
+            if ($category = $DB->get_record('course_categories', array('id'=>$instanceid), 'id,parent', $strictness)) {
                 if ($category->parent) {
                     $parentcontext = context_coursecat::instance($category->parent);
                     $record = context::insert_context_record(CONTEXT_COURSECAT, $category->id, $parentcontext->path);
@@ -6642,19 +6906,19 @@ class context_course extends context {
      * Returns course context instance.
      *
      * @static
-     * @param int $courseid id from {course} table
+     * @param int $instanceid
      * @param int $strictness
      * @return context_course context instance
      */
-    public static function instance($courseid, $strictness = MUST_EXIST) {
+    public static function instance($instanceid, $strictness = MUST_EXIST) {
         global $DB;
 
-        if ($context = context::cache_get(CONTEXT_COURSE, $courseid)) {
+        if ($context = context::cache_get(CONTEXT_COURSE, $instanceid)) {
             return $context;
         }
 
-        if (!$record = $DB->get_record('context', array('contextlevel' => CONTEXT_COURSE, 'instanceid' => $courseid))) {
-            if ($course = $DB->get_record('course', array('id' => $courseid), 'id,category', $strictness)) {
+        if (!$record = $DB->get_record('context', array('contextlevel'=>CONTEXT_COURSE, 'instanceid'=>$instanceid))) {
+            if ($course = $DB->get_record('course', array('id'=>$instanceid), 'id,category', $strictness)) {
                 if ($course->category) {
                     $parentcontext = context_coursecat::instance($course->category);
                     $record = context::insert_context_record(CONTEXT_COURSE, $course->id, $parentcontext->path);
@@ -6903,19 +7167,19 @@ class context_module extends context {
      * Returns module context instance.
      *
      * @static
-     * @param int $cmid id of the record from {course_modules} table; pass cmid there, NOT id in the instance column
+     * @param int $instanceid
      * @param int $strictness
      * @return context_module context instance
      */
-    public static function instance($cmid, $strictness = MUST_EXIST) {
+    public static function instance($instanceid, $strictness = MUST_EXIST) {
         global $DB;
 
-        if ($context = context::cache_get(CONTEXT_MODULE, $cmid)) {
+        if ($context = context::cache_get(CONTEXT_MODULE, $instanceid)) {
             return $context;
         }
 
-        if (!$record = $DB->get_record('context', array('contextlevel' => CONTEXT_MODULE, 'instanceid' => $cmid))) {
-            if ($cm = $DB->get_record('course_modules', array('id' => $cmid), 'id,course', $strictness)) {
+        if (!$record = $DB->get_record('context', array('contextlevel'=>CONTEXT_MODULE, 'instanceid'=>$instanceid))) {
+            if ($cm = $DB->get_record('course_modules', array('id'=>$instanceid), 'id,course', $strictness)) {
                 $parentcontext = context_course::instance($cm->course);
                 $record = context::insert_context_record(CONTEXT_MODULE, $cm->id, $parentcontext->path);
             }
@@ -7115,19 +7379,19 @@ class context_block extends context {
      * Returns block context instance.
      *
      * @static
-     * @param int $blockinstanceid id from {block_instances} table.
+     * @param int $instanceid
      * @param int $strictness
      * @return context_block context instance
      */
-    public static function instance($blockinstanceid, $strictness = MUST_EXIST) {
+    public static function instance($instanceid, $strictness = MUST_EXIST) {
         global $DB;
 
-        if ($context = context::cache_get(CONTEXT_BLOCK, $blockinstanceid)) {
+        if ($context = context::cache_get(CONTEXT_BLOCK, $instanceid)) {
             return $context;
         }
 
-        if (!$record = $DB->get_record('context', array('contextlevel' => CONTEXT_BLOCK, 'instanceid' => $blockinstanceid))) {
-            if ($bi = $DB->get_record('block_instances', array('id' => $blockinstanceid), 'id,parentcontextid', $strictness)) {
+        if (!$record = $DB->get_record('context', array('contextlevel'=>CONTEXT_BLOCK, 'instanceid'=>$instanceid))) {
+            if ($bi = $DB->get_record('block_instances', array('id'=>$instanceid), 'id,parentcontextid', $strictness)) {
                 $parentcontext = context::instance_by_id($bi->parentcontextid);
                 $record = context::insert_context_record(CONTEXT_BLOCK, $bi->id, $parentcontext->path);
             }
@@ -7326,174 +7590,4 @@ function get_suspended_userids(context $context, $usecache = false) {
     }
 
     return $susers;
-}
-
-/**
- * Gets sql for finding users with capability in the given context
- *
- * @param context $context
- * @param string|array $capability Capability name or array of names.
- *      If an array is provided then this is the equivalent of a logical 'OR',
- *      i.e. the user needs to have one of these capabilities.
- * @return array($sql, $params)
- */
-function get_with_capability_sql(context $context, $capability) {
-    static $i = 0;
-    $i++;
-    $prefix = 'cu' . $i . '_';
-
-    $capjoin = get_with_capability_join($context, $capability, $prefix . 'u.id');
-
-    $sql = "SELECT DISTINCT {$prefix}u.id
-              FROM {user} {$prefix}u
-            $capjoin->joins
-             WHERE {$prefix}u.deleted = 0 AND $capjoin->wheres";
-
-    return array($sql, $capjoin->params);
-}
-
-/**
- * Gets sql joins for finding users with capability in the given context
- *
- * @param context $context Context for the join
- * @param string|array $capability Capability name or array of names.
- *      If an array is provided then this is the equivalent of a logical 'OR',
- *      i.e. the user needs to have one of these capabilities.
- * @param string $useridcolumn e.g. 'u.id'
- * @return \core\dml\sql_join Contains joins, wheres, params
- */
-function get_with_capability_join(context $context, $capability, $useridcolumn) {
-    global $DB, $CFG;
-
-    // Use unique prefix just in case somebody makes some SQL magic with the result.
-    static $i = 0;
-    $i++;
-    $prefix = 'eu' . $i . '_';
-
-    // First find the course context.
-    $coursecontext = $context->get_course_context();
-
-    $isfrontpage = ($coursecontext->instanceid == SITEID);
-
-    $joins = array();
-    $wheres = array();
-    $params = array();
-
-    list($contextids, $contextpaths) = get_context_info_list($context);
-
-    list($incontexts, $cparams) = $DB->get_in_or_equal($contextids, SQL_PARAMS_NAMED, 'ctx');
-
-    list($incaps, $capsparams) = $DB->get_in_or_equal($capability, SQL_PARAMS_NAMED, 'cap');
-
-    $defs = array();
-    $sql = "SELECT rc.id, rc.roleid, rc.permission, ctx.path
-              FROM {role_capabilities} rc
-              JOIN {context} ctx on rc.contextid = ctx.id
-             WHERE rc.contextid $incontexts AND rc.capability $incaps";
-    $rcs = $DB->get_records_sql($sql, array_merge($cparams, $capsparams));
-    foreach ($rcs as $rc) {
-        $defs[$rc->path][$rc->roleid] = $rc->permission;
-    }
-
-    $access = array();
-    if (!empty($defs)) {
-        foreach ($contextpaths as $path) {
-            if (empty($defs[$path])) {
-                continue;
-            }
-            foreach ($defs[$path] as $roleid => $perm) {
-                if ($perm == CAP_PROHIBIT) {
-                    $access[$roleid] = CAP_PROHIBIT;
-                    continue;
-                }
-                if (!isset($access[$roleid])) {
-                    $access[$roleid] = (int) $perm;
-                }
-            }
-        }
-    }
-
-    unset($defs);
-
-    // Make lists of roles that are needed and prohibited.
-    $needed = array(); // One of these is enough.
-    $prohibited = array(); // Must not have any of these.
-    foreach ($access as $roleid => $perm) {
-        if ($perm == CAP_PROHIBIT) {
-            unset($needed[$roleid]);
-            $prohibited[$roleid] = true;
-        } else {
-            if ($perm == CAP_ALLOW and empty($prohibited[$roleid])) {
-                $needed[$roleid] = true;
-            }
-        }
-    }
-
-    $defaultuserroleid = isset($CFG->defaultuserroleid) ? $CFG->defaultuserroleid : 0;
-    $defaultfrontpageroleid = isset($CFG->defaultfrontpageroleid) ? $CFG->defaultfrontpageroleid : 0;
-
-    $nobody = false;
-
-    if ($isfrontpage) {
-        if (!empty($prohibited[$defaultuserroleid]) or !empty($prohibited[$defaultfrontpageroleid])) {
-            $nobody = true;
-        } else {
-            if (!empty($needed[$defaultuserroleid]) or !empty($needed[$defaultfrontpageroleid])) {
-                // Everybody not having prohibit has the capability.
-                $needed = array();
-            } else {
-                if (empty($needed)) {
-                    $nobody = true;
-                }
-            }
-        }
-    } else {
-        if (!empty($prohibited[$defaultuserroleid])) {
-            $nobody = true;
-        } else {
-            if (!empty($needed[$defaultuserroleid])) {
-                // Everybody not having prohibit has the capability.
-                $needed = array();
-            } else {
-                if (empty($needed)) {
-                    $nobody = true;
-                }
-            }
-        }
-    }
-
-    if ($nobody) {
-        // Nobody can match so return some SQL that does not return any results.
-        $wheres[] = "1 = 2";
-
-    } else {
-
-        if ($needed) {
-            $ctxids = implode(',', $contextids);
-            $roleids = implode(',', array_keys($needed));
-            $joins[] = "JOIN {role_assignments} {$prefix}ra3
-                    ON ({$prefix}ra3.userid = $useridcolumn
-                    AND {$prefix}ra3.roleid IN ($roleids)
-                    AND {$prefix}ra3.contextid IN ($ctxids))";
-        }
-
-        if ($prohibited) {
-            $ctxids = implode(',', $contextids);
-            $roleids = implode(',', array_keys($prohibited));
-            $joins[] = "LEFT JOIN {role_assignments} {$prefix}ra4
-                    ON ({$prefix}ra4.userid = $useridcolumn
-                    AND {$prefix}ra4.roleid IN ($roleids)
-                    AND {$prefix}ra4.contextid IN ($ctxids))";
-            $wheres[] = "{$prefix}ra4.id IS NULL";
-        }
-
-    }
-
-    $wheres[] = "$useridcolumn <> :{$prefix}guestid";
-    $params["{$prefix}guestid"] = $CFG->siteguest;
-
-    $joins = implode("\n", $joins);
-    $wheres = "(" . implode(" AND ", $wheres) . ")";
-
-    return new \core\dml\sql_join($joins, $wheres, $params);
 }

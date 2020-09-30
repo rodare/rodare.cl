@@ -84,7 +84,8 @@ abstract class restore_tool_log_logstore_subplugin extends restore_subplugin {
             }
         }
 
-        // There is no need to roll dates. Logs are supposed to be immutable. See MDL-44961.
+        // Roll dates.
+        $data->timecreated = $this->apply_date_offset($data->timecreated);
 
         // Revert other to its original php way.
         $data->other = unserialize(base64_decode($data->other));

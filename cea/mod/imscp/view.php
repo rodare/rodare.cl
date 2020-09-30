@@ -62,14 +62,16 @@ $PAGE->requires->string_for_js('show', 'moodle');
 $PAGE->set_title($course->shortname.': '.$imscp->name);
 $PAGE->set_heading($course->fullname);
 $PAGE->set_activity_record($imscp);
+echo $OUTPUT->header();
+echo $OUTPUT->heading(format_string($imscp->name));
 
 // Verify imsmanifest was parsed properly.
 if (!$imscp->structure) {
-    redirect(course_get_url($course->id, $cm->section), get_string('deploymenterror', 'imscp'));
+    echo $OUTPUT->notification(get_string('deploymenterror', 'imscp'), 'notifyproblem');
+    echo $OUTPUT->continue_button(course_get_url($course->id, $cm->section));
+    echo $OUTPUT->footer();
+    die;
 }
-
-echo $OUTPUT->header();
-echo $OUTPUT->heading(format_string($imscp->name));
 
 imscp_print_content($imscp, $cm, $course);
 

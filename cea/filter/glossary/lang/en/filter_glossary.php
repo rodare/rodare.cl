@@ -26,4 +26,3 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['filtername'] = 'Glossary auto-linking';
-$string['privacy:metadata'] = 'The Glossary auto-linking plugin does not store any personal data.';

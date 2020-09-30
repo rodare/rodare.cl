@@ -6677,8 +6677,7 @@
                 var endPos = backward ? firstPosInEl : posAfterEl;
 
                 /*
-                 <body>
-<p>X  </p><p>Y</p></body>
+                 <body><p>X  </p><p>Y</p></body>
 
                  Positions:
 

@@ -59,4 +59,3 @@ $string['placeholderwarning'] = 'string contains a placeholder';
 $string['pluginname'] = 'Language customisation';
 $string['savecheckin'] = 'Save changes to the language pack';
 $string['savecontinue'] = 'Apply changes and continue editing';
-$string['privacy:metadata'] = 'The Language customisation plugin does not store any personal data.';

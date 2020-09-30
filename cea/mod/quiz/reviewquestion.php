@@ -24,13 +24,12 @@
  */
 
 
-require_once(__DIR__ . '/../../config.php');
+require_once(dirname(__FILE__) . '/../../config.php');
 require_once('locallib.php');
 
 $attemptid = required_param('attempt', PARAM_INT);
 $slot = required_param('slot', PARAM_INT);
 $seq = optional_param('step', null, PARAM_INT);
-$cmid = optional_param('cmid', null, PARAM_INT);
 
 $baseurl = new moodle_url('/mod/quiz/reviewquestion.php',
         array('attempt' => $attemptid, 'slot' => $slot));
@@ -40,7 +39,7 @@ if (!is_null($seq)) {
 }
 $PAGE->set_url($currenturl);
 
-$attemptobj = quiz_create_attempt_handling_errors($attemptid, $cmid);
+$attemptobj = quiz_attempt::create($attemptid);
 
 // Check login.
 require_login($attemptobj->get_course(), false, $attemptobj->get_cm());

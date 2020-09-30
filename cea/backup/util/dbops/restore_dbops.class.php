@@ -101,11 +101,9 @@ abstract class restore_dbops {
 
             // If included, add it
             if ($included) {
-                $includedtasks[] = clone($task); // A clone is enough. In fact we only need the basepath.
+                $includedtasks[] = $task;
             }
         }
-        $rc->destroy(); // Always need to destroy.
-
         return $includedtasks;
     }
 
@@ -795,7 +793,7 @@ abstract class restore_dbops {
                      // Prepare the query
                      list($stamp_sql, $stamp_params) = $DB->get_in_or_equal($stamps);
                      list($context_sql, $context_params) = $DB->get_in_or_equal($contexts);
-                     $sql = "SELECT DISTINCT contextid
+                     $sql = "SELECT contextid
                                FROM {question_categories}
                               WHERE stamp $stamp_sql
                                 AND contextid $context_sql";
@@ -1211,14 +1209,16 @@ abstract class restore_dbops {
                 }
 
                 // Process tags
-                if (core_tag_tag::is_enabled('core', 'user') && isset($user->tags)) { // If enabled in server and present in backup.
+                if (!empty($CFG->usetags) && isset($user->tags)) { // if enabled in server and present in backup
                     $tags = array();
                     foreach($user->tags['tag'] as $usertag) {
                         $usertag = (object)$usertag;
                         $tags[] = $usertag->rawname;
                     }
-                    core_tag_tag::set_item_tags('core', 'user', $newuserid,
-                            context_user::instance($newuserid), $tags);
+                    if (empty($newuserctxid)) {
+                        $newuserctxid = null; // Tag apis expect a null contextid not 0.
+                    }
+                    tag_set('user', $newuserid, $tags, 'core', $newuserctxid);
                 }
 
                 // Process preferences
@@ -1512,12 +1512,8 @@ abstract class restore_dbops {
         // Calculate the context we are going to use for capability checking
         $context = context_course::instance($courseid);
 
-        // TODO: Some day we must kill this dependency and change the process
-        // to pass info around without loading a controller copy.
         // When conflicting users are detected we may need original site info.
-        $rc = restore_controller_dbops::load_controller($restoreid);
-        $restoreinfo = $rc->get_info();
-        $rc->destroy(); // Always need to destroy.
+        $restoreinfo = restore_controller_dbops::load_controller($restoreid)->get_info();
 
         // Calculate if we have perms to create users, by checking:
         // to 'moodle/restore:createuser' and 'moodle/restore:userinfo'

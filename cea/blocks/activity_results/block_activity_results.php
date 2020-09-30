@@ -56,15 +56,6 @@ class block_activity_results extends block_base {
     }
 
     /**
-     * Allow the block to have a configuration page
-     *
-     * @return boolean
-     */
-    public function has_config() {
-        return true;
-    }
-
-    /**
      * Core function, specifies where the block can be used.
      * @return array
      */
@@ -682,7 +673,7 @@ class block_activity_results extends block_base {
 
         $o = html_writer::start_tag('h3');
         $o .= html_writer::link(new moodle_url('/mod/'.$activity->itemmodule.'/view.php',
-        array('id' => $cm->id)), format_string(($activity->itemname), true, ['context' => context_module::instance($cm->id)]));
+        array('id' => $cm->id)), $activity->itemname);
         $o .= html_writer::end_tag('h3');
         return $o;
     }

@@ -37,16 +37,13 @@ class auth_plugin_webservice extends auth_plugin_base {
      */
     public function __construct() {
         $this->authtype = 'webservice';
-        $this->config = get_config('auth_webservice');
+        $this->config = get_config('auth/webservice');
     }
 
     /**
-     * Old syntax of class constructor. Deprecated in PHP7.
-     *
-     * @deprecated since Moodle 3.1
+     * Old syntax of class constructor for backward compatibility.
      */
     public function auth_plugin_webservice() {
-        debugging('Use of class name as constructor is deprecated', DEBUG_DEVELOPER);
         self::__construct();
     }
 
@@ -135,6 +132,24 @@ class auth_plugin_webservice extends auth_plugin_base {
      */
     function can_reset_password() {
         return false;
+    }
+
+    /**
+     * Prints a form for configuring this authentication plugin.
+     *
+     * This function is called from admin/auth.php, and outputs a full page with
+     * a form for configuring this plugin.
+     *
+     * @param array $page An object containing all the data for this page.
+     */
+    function config_form($config, $err, $user_fields) {
+    }
+
+    /**
+     * Processes and stores configuration data for this authentication plugin.
+     */
+    function process_config($config) {
+        return true;
     }
 
    /**

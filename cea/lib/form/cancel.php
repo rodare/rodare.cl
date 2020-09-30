@@ -72,12 +72,9 @@ class MoodleQuickForm_cancel extends MoodleQuickForm_submit
     }
 
     /**
-     * Old syntax of class constructor. Deprecated in PHP7.
-     *
-     * @deprecated since Moodle 3.1
+     * Old syntax of class constructor for backward compatibility.
      */
     public function MoodleQuickForm_cancel($elementName=null, $value=null, $attributes=null) {
-        debugging('Use of class name as constructor is deprecated', DEBUG_DEVELOPER);
         self::__construct($elementName, $value, $attributes);
     }
 
@@ -110,4 +107,12 @@ class MoodleQuickForm_cancel extends MoodleQuickForm_submit
         return HTML_QuickForm_submit::getFrozenHtml();
     }
 
+    /**
+     * Freeze the element so that only its value is returned
+     *
+     * @return bool
+     */
+    function freeze(){
+        return HTML_QuickForm_submit::freeze();
+    }
 }

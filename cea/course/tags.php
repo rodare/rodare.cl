@@ -23,6 +23,7 @@
  */
 
 require_once("../config.php");
+require_once($CFG->dirroot . '/tag/lib.php');
 require_once($CFG->dirroot . '/course/tags_form.php');
 
 $id = required_param('id', PARAM_INT); // Course id.
@@ -37,7 +38,7 @@ if (!$course->visible and !has_capability('moodle/course:viewhiddencourses', $co
     print_error('coursehidden', '', $CFG->wwwroot .'/');
 }
 require_capability('moodle/course:tag', $context);
-if (!core_tag_tag::is_enabled('core', 'course')) {
+if (empty($CFG->usetags)) {
     print_error('tagsaredisabled', 'tag');
 }
 
@@ -48,14 +49,14 @@ $PAGE->set_title(get_string('coursetags', 'tag'));
 $PAGE->set_heading($course->fullname);
 
 $form = new coursetags_form();
-$data = array('id' => $course->id, 'tags' => core_tag_tag::get_item_tags_array('core', 'course', $course->id));
+$data = array('id' => $course->id, 'tags' => tag_get_tags_array('course', $course->id));
 $form->set_data($data);
 
 $redirecturl = $returnurl ? new moodle_url($returnurl) : course_get_url($course);
 if ($form->is_cancelled()) {
     redirect($redirecturl);
 } else if ($data = $form->get_data()) {
-    core_tag_tag::set_item_tags('core', 'course', $course->id, context_course::instance($course->id), $data->tags);
+    tag_set('course', $course->id, $data->tags, 'core', context_course::instance($course->id)->id);
     redirect($redirecturl);
 }
 

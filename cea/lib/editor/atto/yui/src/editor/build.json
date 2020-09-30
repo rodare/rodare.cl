@@ -7,7 +7,6 @@
                 "notify.js",
                 "textarea.js",
                 "autosave.js",
-                "autosave-io.js",
                 "clean.js",
                 "commands.js",
                 "toolbar.js",

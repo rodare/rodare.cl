@@ -50,8 +50,6 @@ class MoodleQuickForm_autocomplete extends MoodleQuickForm_select {
     protected $casesensitive = false;
     /** @var bool $showsuggestions Show suggestions by default - but this can be turned off. */
     protected $showsuggestions = true;
-    /** @var string $noselectionstring String that is shown when there are no selections. */
-    protected $noselectionstring = '';
 
     /**
      * constructor
@@ -81,12 +79,6 @@ class MoodleQuickForm_autocomplete extends MoodleQuickForm_select {
             $this->placeholder = $attributes['placeholder'];
             unset($attributes['placeholder']);
         }
-        $this->noselectionstring = get_string('noselection', 'form');
-        if (isset($attributes['noselectionstring'])) {
-            $this->noselectionstring = $attributes['noselectionstring'];
-            unset($attributes['noselectionstring']);
-        }
-
         if (isset($attributes['ajax'])) {
             $this->ajax = $attributes['ajax'];
             unset($attributes['ajax']);
@@ -101,12 +93,9 @@ class MoodleQuickForm_autocomplete extends MoodleQuickForm_select {
     }
 
     /**
-     * Old syntax of class constructor. Deprecated in PHP7.
-     *
-     * @deprecated since Moodle 3.1
+     * Old syntax of class constructor for backward compatibility.
      */
     public function MoodleQuickForm_autocomplete($elementName=null, $elementLabel=null, $options=null, $attributes=null) {
-        debugging('Use of class name as constructor is deprecated', DEBUG_DEVELOPER);
         self::__construct($elementName, $elementLabel, $options, $attributes);
     }
 
@@ -121,11 +110,8 @@ class MoodleQuickForm_autocomplete extends MoodleQuickForm_select {
         // Enhance the select with javascript.
         $this->_generateId();
         $id = $this->getAttribute('id');
-
-        if (!$this->isFrozen()) {
-            $PAGE->requires->js_call_amd('core/form-autocomplete', 'enhance', $params = array('#' . $id, $this->tags, $this->ajax,
-                $this->placeholder, $this->casesensitive, $this->showsuggestions, $this->noselectionstring));
-        }
+        $PAGE->requires->js_call_amd('core/form-autocomplete', 'enhance', $params = array('#' . $id, $this->tags, $this->ajax,
+            $this->placeholder, $this->casesensitive, $this->showsuggestions));
 
         return parent::toHTML();
     }
@@ -206,20 +192,5 @@ class MoodleQuickForm_autocomplete extends MoodleQuickForm_select {
                 break;
         }
         return parent::onQuickFormEvent($event, $arg, $caller);
-    }
-
-    public function export_for_template(renderer_base $output) {
-        global $PAGE;
-
-        $this->_generateId();
-        $context = parent::export_for_template($output);
-        $context['tags'] = !empty($this->tags);
-        $context['ajax'] = $this->ajax;
-        $context['placeholder'] = $this->placeholder;
-        $context['casesensitive'] = !empty($this->casesensitive);
-        $context['showsuggestions'] = !empty($this->showsuggestions);
-        $context['noselectionstring'] = $this->noselectionstring;
-
-        return $context;
     }
 }

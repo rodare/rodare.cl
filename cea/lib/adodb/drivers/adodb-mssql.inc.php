@@ -1,6 +1,6 @@
 <?php
 /*
-@version   v5.20.7  20-Sep-2016
+@version   v5.20.1  06-Dec-2015
 @copyright (c) 2000-2013 John Lim (jlim#natsoft.com). All rights reserved.
 @copyright (c) 2014      Damien Regad, Mark Newnham and the ADOdb community
   Released under both BSD license and Lesser GPL library license.
@@ -1051,14 +1051,10 @@ class ADORecordset_mssql extends ADORecordSet {
 
 	function _close()
 	{
-		if($this->_queryID) {
-			$rez = mssql_free_result($this->_queryID);
-			$this->_queryID = false;
-			return $rez;
-		}
-		return true;
+		$rez = mssql_free_result($this->_queryID);
+		$this->_queryID = false;
+		return $rez;
 	}
-
 	// mssql uses a default date like Dec 30 2000 12:00AM
 	static function UnixDate($v)
 	{

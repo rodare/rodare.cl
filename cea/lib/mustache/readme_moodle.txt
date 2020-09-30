@@ -1,13 +1,19 @@
 Description of Mustache library import into moodle.
 
-1) Download the latest version of mustache.php from upstream (found
-at https://github.com/bobthecow/mustache.php/releases)
+Clone from https://github.com/moodle/custom-mustache.php
 
-2) Move the src/ and LICENSE file into lib/mustache
+Rebase onto latest tag from https://github.com/bobthecow/mustache.php
 
-e.g.
-wget https://github.com/bobthecow/mustache.php/archive/v2.11.1.zip
-unzip v2.11.1.zip
-cd mustache.php-2.11.1/
-mv src /path/to/moodle/lib/mustache/
-mv LICENSE /path/to/moodle/lib/mustache/
+Delete folder "test"
+
+Delete phpunit.xml.dist
+
+Delete hidden files ".*"
+
+Delete folder "bin"
+
+Delete folder "vendor"
+
+Delete composer.json
+
+Copy into this folder, and update this readme to cover any changes.

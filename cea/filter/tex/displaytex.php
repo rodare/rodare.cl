@@ -45,7 +45,6 @@ $title = get_string('source', 'filter_tex')
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   </head>
   <body>
-
     <div>
       <dl>
       <dt><?php echo $title; ?>:</dt>

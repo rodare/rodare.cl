@@ -12,7 +12,6 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-/* eslint-disable no-unused-vars */
 
 /**
  * The Atto WYSIWG pluggable editor, written for Moodle.
@@ -67,7 +66,7 @@ Y.extend(Editor, Y.Base, {
      * @property BLOCK_TAGS
      * @type {Array}
      */
-    BLOCK_TAGS: [
+    BLOCK_TAGS : [
         'address',
         'article',
         'aside',
@@ -170,8 +169,6 @@ Y.extend(Editor, Y.Base, {
             return;
         }
 
-        var extraclasses = this.textarea.getAttribute('class');
-
         this._eventHandles = [];
 
         this._wrapper = Y.Node.create('<div class="' + CSS.WRAPPER + '" />');
@@ -180,7 +177,7 @@ Y.extend(Editor, Y.Base, {
                 'role="textbox" ' +
                 'spellcheck="true" ' +
                 'aria-live="off" ' +
-                'class="{{CSS.CONTENT}} ' + extraclasses + '" ' +
+                'class="{{CSS.CONTENT}}" ' +
                 '/>');
         this.editor = Y.Node.create(template({
             elementid: this.get('elementid'),

@@ -743,7 +743,9 @@ M.course_dndupload = {
         var self = this;
 
         if (file.size > this.maxbytes) {
-            new M.core.alert({message: M.util.get_string('namedfiletoolarge', 'moodle', {filename: file.name})});
+            new M.core.alert({
+                message: "'" + file.name + "' " + M.util.get_string('filetoolarge', 'moodle')
+            });
             return;
         }
 
@@ -774,10 +776,6 @@ M.course_dndupload = {
                                 resel.li.outerHTML = unescape(resel.li.outerHTML);
                             }
                             self.add_editing(result.elementid);
-                            // Fire the content updated event.
-                            require(['core/event', 'jquery'], function(event, $) {
-                                event.notifyFilterContentUpdated($(result.fullcontent));
-                            });
                         } else {
                             // Error - remove the dummy element
                             resel.parent.removeChild(resel.li);

@@ -691,7 +691,6 @@ class output_http_provider extends output_provider {
   </style>
 </head>
 <body>
-
 <div id="page">';
     }
 

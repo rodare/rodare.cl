@@ -64,6 +64,7 @@ class block_tag_youtube extends block_base {
         global $CFG;
 
         //note: do NOT include files at the top of this file
+        require_once($CFG->dirroot.'/tag/lib.php');
         require_once($CFG->libdir . '/filelib.php');
 
         if ($this->content !== NULL) {
@@ -131,12 +132,11 @@ class block_tag_youtube extends block_base {
 
         $tagid = optional_param('id', 0, PARAM_INT);   // tag id - for backware compatibility
         $tag = optional_param('tag', '', PARAM_TAG); // tag
-        $tc = optional_param('tc', 0, PARAM_INT); // Tag collection id.
 
-        if ($tagid) {
-            $tagobject = core_tag_tag::get($tagid);
-        } else if ($tag) {
-            $tagobject = core_tag_tag::get_by_name($tc, $tag);
+        if ($tag) {
+            $tagobject = tag_get('name', $tag);
+        } else if ($tagid) {
+            $tagobject = tag_get('id', $tagid);
         }
 
         if (empty($tagobject)) {
@@ -172,12 +172,11 @@ class block_tag_youtube extends block_base {
 
         $tagid = optional_param('id', 0, PARAM_INT);   // tag id - for backware compatibility
         $tag = optional_param('tag', '', PARAM_TAG); // tag
-        $tc = optional_param('tc', 0, PARAM_INT); // Tag collection id.
 
-        if ($tagid) {
-            $tagobject = core_tag_tag::get($tagid);
-        } else if ($tag) {
-            $tagobject = core_tag_tag::get_by_name($tc, $tag);
+        if ($tag) {
+            $tagobject = tag_get('name', $tag);
+        } else if ($tagid) {
+            $tagobject = tag_get('id', $tagid);
         }
 
         if (empty($tagobject)) {

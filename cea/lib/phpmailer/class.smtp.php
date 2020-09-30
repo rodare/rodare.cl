@@ -28,25 +28,25 @@ class SMTP
 {
     /**
      * The PHPMailer SMTP version number.
-     * @var string
+     * @type string
      */
-    const VERSION = '5.2.23';
+    const VERSION = '5.2.13';
 
     /**
      * SMTP line break constant.
-     * @var string
+     * @type string
      */
     const CRLF = "\r\n";
 
     /**
      * The SMTP port to use if one is not specified.
-     * @var integer
+     * @type integer
      */
     const DEFAULT_SMTP_PORT = 25;
 
     /**
      * The maximum line length allowed by RFC 2822 section 2.1.1
-     * @var integer
+     * @type integer
      */
     const MAX_LINE_LENGTH = 998;
 
@@ -77,15 +77,15 @@ class SMTP
 
     /**
      * The PHPMailer SMTP Version number.
-     * @var string
+     * @type string
      * @deprecated Use the `VERSION` constant instead
      * @see SMTP::VERSION
      */
-    public $Version = '5.2.23';
+    public $Version = '5.2.13';
 
     /**
      * SMTP server port number.
-     * @var integer
+     * @type integer
      * @deprecated This is only ever used as a default value, so use the `DEFAULT_SMTP_PORT` constant instead
      * @see SMTP::DEFAULT_SMTP_PORT
      */
@@ -93,7 +93,7 @@ class SMTP
 
     /**
      * SMTP reply line ending.
-     * @var string
+     * @type string
      * @deprecated Use the `CRLF` constant instead
      * @see SMTP::CRLF
      */
@@ -107,7 +107,7 @@ class SMTP
      * * self::DEBUG_SERVER (`2`) Client commands and server responses
      * * self::DEBUG_CONNECTION (`3`) As DEBUG_SERVER plus connection status
      * * self::DEBUG_LOWLEVEL (`4`) Low-level data output, all messages
-     * @var integer
+     * @type integer
      */
     public $do_debug = self::DEBUG_OFF;
 
@@ -122,7 +122,7 @@ class SMTP
      * <code>
      * $smtp->Debugoutput = function($str, $level) {echo "debug level $level; message: $str";};
      * </code>
-     * @var string|callable
+     * @type string|callable
      */
     public $Debugoutput = 'echo';
 
@@ -130,7 +130,7 @@ class SMTP
      * Whether to use VERP.
      * @link http://en.wikipedia.org/wiki/Variable_envelope_return_path
      * @link http://www.postfix.org/VERP_README.html Info on VERP
-     * @var boolean
+     * @type boolean
      */
     public $do_verp = false;
 
@@ -139,37 +139,26 @@ class SMTP
      * Default of 5 minutes (300sec) is from RFC2821 section 4.5.3.2
      * This needs to be quite high to function correctly with hosts using greetdelay as an anti-spam measure.
      * @link http://tools.ietf.org/html/rfc2821#section-4.5.3.2
-     * @var integer
+     * @type integer
      */
     public $Timeout = 300;
 
     /**
      * How long to wait for commands to complete, in seconds.
      * Default of 5 minutes (300sec) is from RFC2821 section 4.5.3.2
-     * @var integer
+     * @type integer
      */
     public $Timelimit = 300;
 
     /**
-     * @var array patterns to extract smtp transaction id from smtp reply
-     * Only first capture group will be use, use non-capturing group to deal with it
-     * Extend this class to override this property to fulfil your needs.
-     */
-    protected $smtp_transaction_id_patterns = array(
-        'exim' => '/[0-9]{3} OK id=(.*)/',
-        'sendmail' => '/[0-9]{3} 2.0.0 (.*) Message/',
-        'postfix' => '/[0-9]{3} 2.0.0 Ok: queued as (.*)/'
-    );
-
-    /**
      * The socket for the server connection.
-     * @var resource
+     * @type resource
      */
     protected $smtp_conn;
 
     /**
      * Error information, if any, for the last SMTP command.
-     * @var array
+     * @type array
      */
     protected $error = array(
         'error' => '',
@@ -181,7 +170,7 @@ class SMTP
     /**
      * The reply the server sent to us for HELO.
      * If null, no HELO string has yet been received.
-     * @var string|null
+     * @type string|null
      */
     protected $helo_rply = null;
 
@@ -192,13 +181,13 @@ class SMTP
      * represents the server name. In case of HELO it is the only element of the array.
      * Other values can be boolean TRUE or an array containing extension options.
      * If null, no HELO/EHLO string has yet been received.
-     * @var array|null
+     * @type array|null
      */
     protected $server_caps = null;
 
     /**
      * The most recent reply received from the server.
-     * @var string
+     * @type string
      */
     protected $last_reply = '';
 
@@ -217,7 +206,7 @@ class SMTP
         }
         //Avoid clash with built-in function names
         if (!in_array($this->Debugoutput, array('error_log', 'html', 'echo')) and is_callable($this->Debugoutput)) {
-            call_user_func($this->Debugoutput, $str, $level);
+            call_user_func($this->Debugoutput, $str, $this->do_debug);
             return;
         }
         switch ($this->Debugoutput) {
@@ -231,7 +220,8 @@ class SMTP
                     preg_replace('/[\r\n]+/', '', $str),
                     ENT_QUOTES,
                     'UTF-8'
-                ) . "<br>\n";
+                )
+                . "<br>\n";
                 break;
             case 'echo':
             default:
@@ -241,7 +231,7 @@ class SMTP
                     "\n",
                     "\n                   \t                  ",
                     trim($str)
-                ) . "\n";
+                )."\n";
         }
     }
 
@@ -275,16 +265,15 @@ class SMTP
         }
         // Connect to the SMTP server
         $this->edebug(
-            "Connection: opening to $host:$port, timeout=$timeout, options=" .
-            var_export($options, true),
+            "Connection: opening to $host:$port, timeout=$timeout, options=".var_export($options, true),
             self::DEBUG_CONNECTION
         );
         $errno = 0;
         $errstr = '';
         if ($streamok) {
             $socket_context = stream_context_create($options);
-            set_error_handler(array($this, 'errorHandler'));
-            $this->smtp_conn = stream_socket_client(
+            //Suppress errors; connection failures are handled at a higher level
+            $this->smtp_conn = @stream_socket_client(
                 $host . ":" . $port,
                 $errno,
                 $errstr,
@@ -292,14 +281,12 @@ class SMTP
                 STREAM_CLIENT_CONNECT,
                 $socket_context
             );
-            restore_error_handler();
         } else {
             //Fall back to fsockopen which should work in more places, but is missing some features
             $this->edebug(
                 "Connection: stream_socket_client not available, falling back to fsockopen",
                 self::DEBUG_CONNECTION
             );
-            set_error_handler(array($this, 'errorHandler'));
             $this->smtp_conn = fsockopen(
                 $host,
                 $port,
@@ -307,7 +294,6 @@ class SMTP
                 $errstr,
                 $timeout
             );
-            restore_error_handler();
         }
         // Verify we connected properly
         if (!is_resource($this->smtp_conn)) {
@@ -350,26 +336,15 @@ class SMTP
         if (!$this->sendCommand('STARTTLS', 'STARTTLS', 220)) {
             return false;
         }
-
-        //Allow the best TLS version(s) we can
-        $crypto_method = STREAM_CRYPTO_METHOD_TLS_CLIENT;
-
-        //PHP 5.6.7 dropped inclusion of TLS 1.1 and 1.2 in STREAM_CRYPTO_METHOD_TLS_CLIENT
-        //so add them back in manually if we can
-        if (defined('STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT')) {
-            $crypto_method |= STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT;
-            $crypto_method |= STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT;
-        }
-
         // Begin encrypted connection
-        set_error_handler(array($this, 'errorHandler'));
-        $crypto_ok = stream_socket_enable_crypto(
+        if (!stream_socket_enable_crypto(
             $this->smtp_conn,
             true,
-            $crypto_method
-        );
-        restore_error_handler();
-        return $crypto_ok;
+            STREAM_CRYPTO_METHOD_TLS_CLIENT
+        )) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -381,7 +356,7 @@ class SMTP
      * @param string $authtype The auth type (PLAIN, LOGIN, NTLM, CRAM-MD5, XOAUTH2)
      * @param string $realm The auth realm for NTLM
      * @param string $workstation The auth workstation for NTLM
-     * @param null|OAuth $OAuth An optional OAuth instance (@see PHPMailerOAuth)
+     * @param null|OAuth  $OAuth An optional OAuth instance (@see PHPMailerOAuth)
      * @return bool True if successfully authenticated.* @access public
      */
     public function authenticate(
@@ -398,7 +373,8 @@ class SMTP
         }
 
         if (array_key_exists('EHLO', $this->server_caps)) {
-            // SMTP extensions are available; try to find a proper authentication method
+        // SMTP extensions are available. Let's try to find a proper authentication method
+
             if (!array_key_exists('AUTH', $this->server_caps)) {
                 $this->setError('Authentication is not allowed at this stage');
                 // 'at this stage' means that auth may be allowed after the stage changes
@@ -413,7 +389,7 @@ class SMTP
             );
 
             if (empty($authtype)) {
-                foreach (array('CRAM-MD5', 'LOGIN', 'PLAIN', 'NTLM', 'XOAUTH2') as $method) {
+                foreach (array('LOGIN', 'CRAM-MD5', 'NTLM', 'PLAIN', 'XOAUTH2') as $method) {
                     if (in_array($method, $this->server_caps['AUTH'])) {
                         $authtype = $method;
                         break;
@@ -423,7 +399,7 @@ class SMTP
                     $this->setError('No supported authentication methods found');
                     return false;
                 }
-                self::edebug('Auth method selected: ' . $authtype, self::DEBUG_LOWLEVEL);
+                self::edebug('Auth method selected: '.$authtype, self::DEBUG_LOWLEVEL);
             }
 
             if (!in_array($authtype, $this->server_caps['AUTH'])) {
@@ -487,7 +463,7 @@ class SMTP
                 $temp = new stdClass;
                 $ntlm_client = new ntlm_sasl_client_class;
                 //Check that functions are available
-                if (!$ntlm_client->initialize($temp)) {
+                if (!$ntlm_client->Initialize($temp)) {
                     $this->setError($temp->error);
                     $this->edebug(
                         'You need to enable some modules in your php.ini file: '
@@ -497,7 +473,7 @@ class SMTP
                     return false;
                 }
                 //msg1
-                $msg1 = $ntlm_client->typeMsg1($realm, $workstation); //msg1
+                $msg1 = $ntlm_client->TypeMsg1($realm, $workstation); //msg1
 
                 if (!$this->sendCommand(
                     'AUTH NTLM',
@@ -516,7 +492,7 @@ class SMTP
                     $password
                 );
                 //msg3
-                $msg3 = $ntlm_client->typeMsg3(
+                $msg3 = $ntlm_client->TypeMsg3(
                     $ntlm_res,
                     $username,
                     $realm,
@@ -549,7 +525,7 @@ class SMTP
      * Works like hash_hmac('md5', $data, $key)
      * in case that function is not available
      * @param string $data The data to hash
-     * @param string $key The key to hash with
+     * @param string $key  The key to hash with
      * @access protected
      * @return string
      */
@@ -760,7 +736,7 @@ class SMTP
     protected function parseHelloFields($type)
     {
         $this->server_caps = array();
-        $lines = explode("\n", $this->helo_rply);
+        $lines = explode("\n", $this->last_reply);
 
         foreach ($lines as $n => $s) {
             //First 4 chars contain response code followed by - or space
@@ -838,15 +814,15 @@ class SMTP
      * Sets the TO argument to $toaddr.
      * Returns true if the recipient was accepted false if it was rejected.
      * Implements from rfc 821: RCPT <SP> TO:<forward-path> <CRLF>
-     * @param string $address The address the message is being sent to
+     * @param string $toaddr The address the message is being sent to
      * @access public
      * @return boolean
      */
-    public function recipient($address)
+    public function recipient($toaddr)
     {
         return $this->sendCommand(
             'RCPT TO',
-            'RCPT TO:<' . $address . '>',
+            'RCPT TO:<' . $toaddr . '>',
             array(250, 251)
         );
     }
@@ -865,9 +841,9 @@ class SMTP
 
     /**
      * Send a command to an SMTP server and check its return code.
-     * @param string $command The command name - not sent to the server
+     * @param string $command       The command name - not sent to the server
      * @param string $commandstring The actual command to send
-     * @param integer|array $expect One or more expected integer success codes
+     * @param integer|array $expect     One or more expected integer success codes
      * @access protected
      * @return boolean True on success.
      */
@@ -875,11 +851,6 @@ class SMTP
     {
         if (!$this->connected()) {
             $this->setError("Called $command without being connected");
-            return false;
-        }
-        //Reject line breaks in all commands
-        if (strpos($commandstring, "\n") !== false or strpos($commandstring, "\r") !== false) {
-            $this->setError("Command '$command' contained line breaks");
             return false;
         }
         $this->client_send($commandstring . self::CRLF);
@@ -892,8 +863,7 @@ class SMTP
             $code_ex = (count($matches) > 2 ? $matches[2] : null);
             // Cut off error code from each response line
             $detail = preg_replace(
-                "/{$code}[ -]" .
-                ($code_ex ? str_replace('.', '\\.', $code_ex) . ' ' : '') . "/m",
+                "/{$code}[ -]".($code_ex ? str_replace('.', '\\.', $code_ex).' ' : '')."/m",
                 '',
                 $this->last_reply
             );
@@ -1105,7 +1075,7 @@ class SMTP
             // Now check if reads took too long
             if ($endtime and time() > $endtime) {
                 $this->edebug(
-                    'SMTP -> get_lines(): timelimit reached (' .
+                    'SMTP -> get_lines(): timelimit reached ('.
                     $this->Timelimit . ' sec)',
                     self::DEBUG_LOWLEVEL
                 );
@@ -1202,50 +1172,5 @@ class SMTP
     public function getTimeout()
     {
         return $this->Timeout;
-    }
-
-    /**
-     * Reports an error number and string.
-     * @param integer $errno The error number returned by PHP.
-     * @param string $errmsg The error message returned by PHP.
-     * @param string $errfile The file the error occurred in
-     * @param integer $errline The line number the error occurred on
-     */
-    protected function errorHandler($errno, $errmsg, $errfile = '', $errline = 0)
-    {
-        $notice = 'Connection failed.';
-        $this->setError(
-            $notice,
-            $errno,
-            $errmsg
-        );
-        $this->edebug(
-            $notice . ' Error #' . $errno . ': ' . $errmsg . " [$errfile line $errline]",
-            self::DEBUG_CONNECTION
-        );
-    }
-
-    /**
-     * Will return the ID of the last smtp transaction based on a list of patterns provided
-     * in SMTP::$smtp_transaction_id_patterns.
-     * If no reply has been received yet, it will return null.
-     * If no pattern has been matched, it will return false.
-     * @return bool|null|string
-     */
-    public function getLastTransactionID()
-    {
-        $reply = $this->getLastReply();
-
-        if (empty($reply)) {
-            return null;
-        }
-
-        foreach ($this->smtp_transaction_id_patterns as $smtp_transaction_id_pattern) {
-            if (preg_match($smtp_transaction_id_pattern, $reply, $matches)) {
-                return $matches[1];
-            }
-        }
-
-        return false;
     }
 }

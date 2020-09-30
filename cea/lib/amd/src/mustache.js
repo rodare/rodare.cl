@@ -2,7 +2,6 @@
 //
 // Copyright (c) 2009 Chris Wanstrath (Ruby)
 // Copyright (c) 2010-2014 Jan Lehnardt (JavaScript)
-// Copyright (c) 2010-2015 The mustache.js community
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -31,7 +30,6 @@
 // Add the license as a comment to the file and these instructions.
 // Add jshint tags so this file is not linted.
 // Remove the "global define:" comment (hint for linter)
-// Make sure that you have not removed the custom code for '$' and '<'.
 
 /*!
  * mustache.js - Logic-less {{mustache}} templates with JavaScript
@@ -47,7 +45,7 @@
     define(['exports'], factory); // AMD
   } else {
     global.Mustache = {};
-    factory(global.Mustache); // script, wsh, asp
+    factory(Mustache); // script, wsh, asp
   }
 }(this, function mustacheFactory (mustache) {
 
@@ -98,13 +96,11 @@
     '>': '&gt;',
     '"': '&quot;',
     "'": '&#39;',
-    '/': '&#x2F;',
-    '`': '&#x60;',
-    '=': '&#x3D;'
+    '/': '&#x2F;'
   };
 
   function escapeHtml (string) {
-    return String(string).replace(/[&<>"'`=\/]/g, function fromEntityMap (s) {
+    return String(string).replace(/[&<>"'\/]/g, function fromEntityMap (s) {
       return entityMap[s];
     });
   }
@@ -304,21 +300,21 @@
       token = tokens[i];
 
       switch (token[0]) {
-        case '$':
-        case '<':
-        case '#':
-        case '^':
-          collector.push(token);
-          sections.push(token);
-          collector = token[4] = [];
-          break;
-        case '/':
-          section = sections.pop();
-          section[5] = token[2];
-          collector = sections.length > 0 ? sections[sections.length - 1][4] : nestedTokens;
-          break;
-        default:
-          collector.push(token);
+      case '$':
+      case '<':
+      case '#':
+      case '^':
+        collector.push(token);
+        sections.push(token);
+        collector = token[4] = [];
+        break;
+      case '/':
+        section = sections.pop();
+        section[5] = token[2];
+        collector = sections.length > 0 ? sections[sections.length - 1][4] : nestedTokens;
+        break;
+      default:
+        collector.push(token);
       }
     }
 
@@ -368,16 +364,16 @@
     var index = this.tail.search(re), match;
 
     switch (index) {
-      case -1:
-        match = this.tail;
-        this.tail = '';
-        break;
-      case 0:
-        match = '';
-        break;
-      default:
-        match = this.tail.substring(0, index);
-        this.tail = this.tail.substring(index);
+    case -1:
+      match = this.tail;
+      this.tail = '';
+      break;
+    case 0:
+      match = '';
+      break;
+    default:
+      match = this.tail.substring(0, index);
+      this.tail = this.tail.substring(index);
     }
 
     this.pos += match.length;
@@ -671,7 +667,7 @@
   };
 
   mustache.name = 'mustache.js';
-  mustache.version = '2.2.1';
+  mustache.version = '2.1.3';
   mustache.tags = [ '{{', '}}' ];
 
   // All high-level mustache.* functions use this writer.

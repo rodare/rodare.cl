@@ -33,8 +33,7 @@ $functions = array(
         'methodname'    => 'login_user',
         'description'   => 'Log a user into a chat room in the given chat.',
         'type'          => 'write',
-        'capabilities'  => 'mod/chat:chat',
-        'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
+        'capabilities'  => 'mod/chat:chat'
     ),
 
     'mod_chat_get_chat_users' => array(
@@ -42,8 +41,7 @@ $functions = array(
         'methodname'    => 'get_chat_users',
         'description'   => 'Get the list of users in the given chat session.',
         'type'          => 'read',
-        'capabilities'  => 'mod/chat:chat',
-        'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
+        'capabilities'  => 'mod/chat:chat'
     ),
 
     'mod_chat_send_chat_message' => array(
@@ -51,8 +49,7 @@ $functions = array(
         'methodname'    => 'send_chat_message',
         'description'   => 'Send a message on the given chat session.',
         'type'          => 'write',
-        'capabilities'  => 'mod/chat:chat',
-        'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
+        'capabilities'  => 'mod/chat:chat'
     ),
 
     'mod_chat_get_chat_latest_messages' => array(
@@ -60,8 +57,7 @@ $functions = array(
         'methodname'    => 'get_chat_latest_messages',
         'description'   => 'Get the latest messages from the given chat session.',
         'type'          => 'read',
-        'capabilities'  => 'mod/chat:chat',
-        'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
+        'capabilities'  => 'mod/chat:chat'
     ),
 
     'mod_chat_view_chat' => array(
@@ -69,8 +65,7 @@ $functions = array(
         'methodname'    => 'view_chat',
         'description'   => 'Trigger the course module viewed event and update the module completion status.',
         'type'          => 'write',
-        'capabilities'  => 'mod/chat:chat',
-        'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
+        'capabilities'  => 'mod/chat:chat'
     ),
 
     'mod_chat_get_chats_by_courses' => array(
@@ -79,7 +74,6 @@ $functions = array(
         'description'   => 'Returns a list of chat instances in a provided set of courses,
                             if no courses are provided then all the chat instances the user has access to will be returned.',
         'type'          => 'read',
-        'capabilities'  => '',
-        'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
+        'capabilities'  => ''
     )
 );

@@ -708,18 +708,6 @@ class structure {
             $moveafterslotnumber = (int) $this->slots[$idmoveafter]->slot;
         }
 
-        // If the action came in as moving a slot to itself, normalise this to
-        // moving the slot to after the previous slot.
-        if ($moveafterslotnumber == $movingslotnumber) {
-            $moveafterslotnumber = $moveafterslotnumber - 1;
-        }
-
-        $followingslotnumber = $moveafterslotnumber + 1;
-        // Prevent checking against non-existance slot when already at the last slot.
-        if ($followingslotnumber == $movingslotnumber && !$this->is_last_slot_in_quiz($followingslotnumber)) {
-            $followingslotnumber += 1;
-        }
-
         // Check the target page number is OK.
         if ($page == 0) {
             $page = 1;
@@ -728,8 +716,14 @@ class structure {
                 $page < 1) {
             throw new \coding_exception('The target page number is too small.');
         } else if (!$this->is_last_slot_in_quiz($moveafterslotnumber) &&
-                $page > $this->get_page_number_for_slot($followingslotnumber)) {
+                $page > $this->get_page_number_for_slot($moveafterslotnumber + 1)) {
             throw new \coding_exception('The target page number is too large.');
+        }
+
+        // If the action came in as moving a slot to itself, normalise this to
+        // moving the slot to after the previosu slot.
+        if ($moveafterslotnumber == $movingslotnumber) {
+            $moveafterslotnumber = $moveafterslotnumber - 1;
         }
 
         // Work out how things are being moved.
@@ -774,12 +768,10 @@ class structure {
                 $headingmoveafter = $movingslotnumber;
                 $headingmovebefore = $movingslotnumber + 2;
                 $headingmovedirection = -1;
-            } else if ($page < $movingslot->page) {
+            } else {
                 $headingmoveafter = $movingslotnumber - 1;
                 $headingmovebefore = $movingslotnumber + 1;
                 $headingmovedirection = 1;
-            } else {
-                return; // Nothing to do.
             }
         }
 
@@ -802,8 +794,14 @@ class structure {
         }
 
         // Update section fist slots.
-        quiz_update_section_firstslots($this->get_quizid(), $headingmovedirection,
-                $headingmoveafter, $headingmovebefore);
+        $DB->execute("
+                UPDATE {quiz_sections}
+                   SET firstslot = firstslot + ?
+                 WHERE quizid = ?
+                   AND firstslot > ?
+                   AND firstslot < ?
+                ", array($headingmovedirection, $this->get_quizid(),
+                        $headingmoveafter, $headingmovebefore));
 
         // If any pages are now empty, remove them.
         $emptypages = $DB->get_fieldset_sql("
@@ -909,7 +907,12 @@ class structure {
             question_delete_question($slot->questionid);
         }
 
-        quiz_update_section_firstslots($this->get_quizid(), -1, $slotnumber);
+        $DB->execute("
+                UPDATE {quiz_sections}
+                   SET firstslot = firstslot - 1
+                 WHERE quizid = ?
+                   AND firstslot > ?
+                ", array($this->get_quizid(), $slotnumber));
         unset($this->questions[$slot->questionid]);
 
         $this->refresh_page_numbers_and_update_db();
@@ -982,16 +985,12 @@ class structure {
     /**
      * Add a section heading on a given page and return the sectionid
      * @param int $pagenumber the number of the page where the section heading begins.
-     * @param string|null $heading the heading to add. If not given, a default is used.
+     * @param string $heading the heading to add.
      */
-    public function add_section_heading($pagenumber, $heading = null) {
+    public function add_section_heading($pagenumber, $heading = 'Section heading ...') {
         global $DB;
         $section = new \stdClass();
-        if ($heading !== null) {
-            $section->heading = $heading;
-        } else {
-            $section->heading = get_string('newsectionheading', 'quiz');
-        }
+        $section->heading = $heading;
         $section->quizid = $this->get_quizid();
         $slotsonpage = $DB->get_records('quiz_slots', array('quizid' => $this->get_quizid(), 'page' => $pagenumber), 'slot DESC');
         $section->firstslot = end($slotsonpage)->slot;

@@ -102,11 +102,7 @@ class restore_qtype_multianswer_plugin extends restore_qtype_plugin {
                    AND bi.itemname = 'question_created'",
                 array($this->get_restoreid()));
         foreach ($rs as $rec) {
-            $sequencearr = preg_split('/,/', $rec->sequence, -1, PREG_SPLIT_NO_EMPTY);
-            if (substr_count($rec->sequence, ',') + 1 != count($sequencearr)) {
-                $this->task->log('Invalid sequence found in restored multianswer question ' . $rec->id, backup::LOG_WARNING);
-            }
-
+            $sequencearr = explode(',', $rec->sequence);
             foreach ($sequencearr as $key => $question) {
                 $sequencearr[$key] = $this->get_mappingid('question', $question);
             }

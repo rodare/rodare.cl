@@ -48,8 +48,7 @@ var CSS = {
         INPUTCONSTRAIN: 'atto_image_constrain',
         INPUTCUSTOMSTYLE: 'atto_image_customstyle',
         IMAGEPREVIEW: 'atto_image_preview',
-        IMAGEPREVIEWBOX: 'atto_image_preview_box',
-        ALIGNSETTINGS: 'atto_image_button'
+        IMAGEPREVIEWBOX: 'atto_image_preview_box'
     },
     SELECTORS = {
         INPUTURL: '.' + CSS.INPUTURL
@@ -57,34 +56,38 @@ var CSS = {
     ALIGNMENTS = [
         // Vertical alignment.
         {
-            name: 'verticalAlign',
+            name: 'text-top',
             str: 'alignment_top',
-            value: 'text-top',
-            margin: '0 0.5em'
+            value: 'vertical-align',
+            margin: '0 .5em'
         }, {
-            name: 'verticalAlign',
+            name: 'middle',
             str: 'alignment_middle',
-            value: 'middle',
-            margin: '0 0.5em'
+            value: 'vertical-align',
+            margin: '0 .5em'
         }, {
-            name: 'verticalAlign',
+            name: 'text-bottom',
             str: 'alignment_bottom',
-            value: 'text-bottom',
-            margin: '0 0.5em',
+            value: 'vertical-align',
+            margin: '0 .5em',
             isDefault: true
         },
 
         // Floats.
         {
-            name: 'float',
+            name: 'left',
             str: 'alignment_left',
-            value: 'left',
-            margin: '0 0.5em 0 0'
+            value: 'float',
+            margin: '0 .5em 0 0'
         }, {
-            name: 'float',
+            name: 'right',
             str: 'alignment_right',
-            value: 'right',
-            margin: '0 0 0 0.5em'
+            value: 'float',
+            margin: '0 0 0 .5em'
+        }, {
+            name: 'customstyle',
+            str: 'customstyle',
+            value: 'style'
         }
     ],
 
@@ -139,7 +142,7 @@ var CSS = {
                 '<label class="sameline" for="{{elementid}}_{{CSS.INPUTALIGNMENT}}">{{get_string "alignment" component}}</label>' +
                 '<select class="{{CSS.INPUTALIGNMENT}}" id="{{elementid}}_{{CSS.INPUTALIGNMENT}}">' +
                     '{{#each alignments}}' +
-                        '<option value="{{value}}">{{get_string str ../component}}</option>' +
+                        '<option value="{{value}}:{{name}};">{{get_string str ../component}}</option>' +
                     '{{/each}}' +
                 '</select>' +
                 // Hidden input to store custom styles.
@@ -162,7 +165,7 @@ var CSS = {
                 '{{#if width}}width="{{width}}" {{/if}}' +
                 '{{#if height}}height="{{height}}" {{/if}}' +
                 '{{#if presentation}}role="presentation" {{/if}}' +
-                '{{#if customstyle}}style="{{customstyle}}" {{/if}}' +
+                'style="{{alignment}}{{margin}}{{customstyle}}"' +
                 '{{#if classlist}}class="{{classlist}}" {{/if}}' +
                 '{{#if id}}id="{{id}}" {{/if}}' +
                 '/>';
@@ -216,14 +219,6 @@ Y.namespace('M.atto_image').Button = Y.Base.create('button', Y.M.editor_atto.Edi
         this.editor.delegate('dblclick', this._displayDialogue, 'img', this);
         this.editor.delegate('click', this._handleClick, 'img', this);
         this.editor.on('drop', this._handleDragDrop, this);
-
-        // e.preventDefault needed to stop the default event from clobbering the desired behaviour in some browsers.
-        this.editor.on('dragover', function(e) {
-            e.preventDefault();
-        }, this);
-        this.editor.on('dragenter', function(e) {
-            e.preventDefault();
-        }, this);
     },
 
     /**
@@ -231,7 +226,6 @@ Y.namespace('M.atto_image').Button = Y.Base.create('button', Y.M.editor_atto.Edi
      *
      * @method _handleDragDrop
      * @param {EventFacade} e
-     * @return mixed
      * @private
      */
     _handleDragDrop: function(e) {
@@ -397,8 +391,7 @@ Y.namespace('M.atto_image').Button = Y.Base.create('button', Y.M.editor_atto.Edi
      * @private
      */
     _loadPreviewImage: function(url) {
-        var image = new Image();
-        var self = this;
+        var image = new Image(), self = this;
 
         image.onerror = function() {
             var preview = self._form.one('.' + CSS.IMAGEPREVIEW);
@@ -447,8 +440,8 @@ Y.namespace('M.atto_image').Button = Y.Base.create('button', Y.M.editor_atto.Edi
                     this.height = 1;
                 }
                 // This is the same as comparing to 3 decimal places.
-                widthRatio = Math.round(1000 * parseInt(currentwidth, 10) / this.width);
-                heightRatio = Math.round(1000 * parseInt(currentheight, 10) / this.height);
+                widthRatio = Math.round(1000*parseInt(currentwidth, 10) / this.width);
+                heightRatio = Math.round(1000*parseInt(currentheight, 10) / this.height);
                 input.set('checked', widthRatio === heightRatio);
             }
 
@@ -645,25 +638,30 @@ Y.namespace('M.atto_image').Button = Y.Base.create('button', Y.M.editor_atto.Edi
      */
     _applyImageProperties: function(form) {
         var properties = this._getSelectedImageProperties(),
-            img = form.one('.' + CSS.IMAGEPREVIEW);
+            img = form.one('.' + CSS.IMAGEPREVIEW),
+            i,
+            css;
 
         if (properties === false) {
             img.setStyle('display', 'none');
             // Set the default alignment.
-            ALIGNMENTS.some(function(alignment) {
-                if (alignment.isDefault) {
-                    form.one('.' + CSS.INPUTALIGNMENT).set('value', alignment.value);
-                    return true;
+            for (i in ALIGNMENTS) {
+                if (ALIGNMENTS[i].isDefault === true) {
+                    css = ALIGNMENTS[i].value + ':' + ALIGNMENTS[i].name + ';';
+                    form.one('.' + CSS.INPUTALIGNMENT).set('value', css);
                 }
-
-                return false;
-            }, this);
-
+            }
+            // Remove the custom style option if this is a new image.
+            form.one('.' + CSS.INPUTALIGNMENT).getDOMNode().options.remove(ALIGNMENTS.length - 1);
             return;
         }
 
         if (properties.align) {
             form.one('.' + CSS.INPUTALIGNMENT).set('value', properties.align);
+            // Remove the custom style option if we have a standard alignment.
+            form.one('.' + CSS.INPUTALIGNMENT).getDOMNode().options.remove(ALIGNMENTS.length - 1);
+        } else {
+            form.one('.' + CSS.INPUTALIGNMENT).set('value', 'style:customstyle;');
         }
         if (properties.customstyle) {
             form.one('.' + CSS.INPUTCUSTOMSTYLE).set('value', properties.customstyle);
@@ -701,7 +699,7 @@ Y.namespace('M.atto_image').Button = Y.Base.create('button', Y.M.editor_atto.Edi
     _getSelectedImageProperties: function() {
         var properties = {
                 src: null,
-                alt: null,
+                alt :null,
                 width: null,
                 height: null,
                 align: '',
@@ -710,21 +708,25 @@ Y.namespace('M.atto_image').Button = Y.Base.create('button', Y.M.editor_atto.Edi
 
             // Get the current selection.
             images = this.get('host').getSelectedNodes(),
+            i,
             width,
             height,
             style,
-            image;
+            css,
+            image,
+            margin;
 
         if (images) {
             images = images.filter('img');
         }
 
         if (images && images.size()) {
-            image = this._removeLegacyAlignment(images.item(0));
+            image = images.item(0);
             this._selectedImage = image;
 
             style = image.getAttribute('style');
             properties.customstyle = style;
+            style = style.replace(/ /g, '');
 
             width = image.getAttribute('width');
             if (!width.match(REGEX.ISPERCENT)) {
@@ -741,7 +743,18 @@ Y.namespace('M.atto_image').Button = Y.Base.create('button', Y.M.editor_atto.Edi
             if (height !== 0) {
                 properties.height = height;
             }
-            this._getAlignmentPropeties(image, properties);
+            for (i in ALIGNMENTS) {
+                css = ALIGNMENTS[i].value + ':' + ALIGNMENTS[i].name + ';';
+                if (style.indexOf(css) !== -1) {
+                    margin = 'margin:' + ALIGNMENTS[i].margin + ';';
+                    margin = margin.replace(/ /g, '');
+                    // Must match alignment and margins - otherwise custom style is selected.
+                    if (style.indexOf(margin) !== -1) {
+                        properties.align = css;
+                        break;
+                    }
+                }
+            }
             properties.src = image.getAttribute('src');
             properties.alt = image.getAttribute('alt') || '';
             properties.presentation = (image.get('role') === 'presentation');
@@ -751,39 +764,6 @@ Y.namespace('M.atto_image').Button = Y.Base.create('button', Y.M.editor_atto.Edi
         // No image selected - clean up.
         this._selectedImage = null;
         return false;
-    },
-
-    /**
-     * Sets the alignment of a properties object.
-     *
-     * @method _getAlignmentPropeties
-     * @param {Node} image The image that the alignment properties should be found for
-     * @param {Object} properties The properties object that is created in _getSelectedImageProperties()
-     * @private
-     */
-    _getAlignmentPropeties: function(image, properties) {
-        var complete = false,
-            defaultAlignment;
-
-        // Check for an alignment value.
-        complete = ALIGNMENTS.some(function(alignment) {
-            var classname = this._getAlignmentClass(alignment.value);
-            if (image.hasClass(classname)) {
-                properties.align = alignment.value;
-
-                return true;
-            }
-
-            if (alignment.isDefault) {
-                defaultAlignment = alignment.value;
-            }
-
-            return false;
-        }, this);
-
-        if (!complete && defaultAlignment) {
-            properties.align = defaultAlignment;
-        }
     },
 
     /**
@@ -815,11 +795,14 @@ Y.namespace('M.atto_image').Button = Y.Base.create('button', Y.M.editor_atto.Edi
             alt = form.one('.' + CSS.INPUTALT).get('value'),
             width = form.one('.' + CSS.INPUTWIDTH).get('value'),
             height = form.one('.' + CSS.INPUTHEIGHT).get('value'),
-            alignment = this._getAlignmentClass(form.one('.' + CSS.INPUTALIGNMENT).get('value')),
+            alignment = form.one('.' + CSS.INPUTALIGNMENT).get('value'),
+            margin = '',
             presentation = form.one('.' + CSS.IMAGEPRESENTATION).get('checked'),
             constrain = form.one('.' + CSS.INPUTCONSTRAIN).get('checked'),
             imagehtml,
-            customstyle = form.one('.' + CSS.INPUTCUSTOMSTYLE).get('value'),
+            customstyle = '',
+            i,
+            css,
             classlist = [],
             host = this.get('host');
 
@@ -839,12 +822,21 @@ Y.namespace('M.atto_image').Button = Y.Base.create('button', Y.M.editor_atto.Edi
                 host.setSelection(this._currentSelection);
             }
 
+            if (alignment === 'style:customstyle;') {
+                alignment = '';
+                customstyle = form.one('.' + CSS.INPUTCUSTOMSTYLE).get('value');
+            } else {
+                for (i in ALIGNMENTS) {
+                    css = ALIGNMENTS[i].value + ':' + ALIGNMENTS[i].name + ';';
+                    if (alignment === css) {
+                        margin = ' margin: ' + ALIGNMENTS[i].margin + ';';
+                    }
+                }
+            }
+
             if (constrain) {
                 classlist.push(CSS.RESPONSIVE);
             }
-
-            // Add the alignment class for the image.
-            classlist.push(alignment);
 
             if (!width.match(REGEX.ISPERCENT) && isNaN(parseInt(width, 10))) {
                 form.one('.' + CSS.INPUTWIDTH).focus();
@@ -862,6 +854,8 @@ Y.namespace('M.atto_image').Button = Y.Base.create('button', Y.M.editor_atto.Edi
                 width: width,
                 height: height,
                 presentation: presentation,
+                alignment: alignment,
+                margin: margin,
                 customstyle: customstyle,
                 classlist: classlist.join(' ')
             });
@@ -875,47 +869,6 @@ Y.namespace('M.atto_image').Button = Y.Base.create('button', Y.M.editor_atto.Edi
             focusAfterHide: null
         }).hide();
 
-    },
-
-    /**
-     * Removes any legacy styles added by previous versions of the atto image button.
-     *
-     * @method _removeLegacyAlignment
-     * @param {Y.Node} imageNode
-     * @return {Y.Node}
-     * @private
-     */
-    _removeLegacyAlignment: function(imageNode) {
-        if (!imageNode.getStyle('margin')) {
-            // There is no margin therefore this cannot match any known alignments.
-            return imageNode;
-        }
-
-        ALIGNMENTS.some(function(alignment) {
-            if (imageNode.getStyle(alignment.name) !== alignment.value) {
-                // The name/value do not match. Skip.
-                return false;
-            }
-
-            var normalisedNode = Y.Node.create('<div>');
-            normalisedNode.setStyle('margin', alignment.margin);
-            if (imageNode.getStyle('margin') !== normalisedNode.getStyle('margin')) {
-                // The margin does not match.
-                return false;
-            }
-
-            imageNode.addClass(this._getAlignmentClass(alignment.value));
-            imageNode.setStyle(alignment.name, null);
-            imageNode.setStyle('margin', null);
-
-            return true;
-        }, this);
-
-        return imageNode;
-    },
-
-    _getAlignmentClass: function(alignment) {
-        return CSS.ALIGNSETTINGS + '_' + alignment;
     },
 
     /**

@@ -82,10 +82,10 @@ abstract class advanced_testcase extends base_testcase {
             $DB = phpunit_util::get_global_backup('DB');
 
             // Deal with any debugging messages.
-            $debugerror = phpunit_util::display_debugging_messages(true);
+            $debugerror = phpunit_util::display_debugging_messages();
             $this->resetDebugging();
-            if (!empty($debugerror)) {
-                trigger_error('Unexpected debugging() call detected.'."\n".$debugerror, E_USER_NOTICE);
+            if ($debugerror) {
+                trigger_error('Unexpected debugging() call detected.', E_USER_NOTICE);
             }
 
         } catch (Exception $ex) {
@@ -280,9 +280,6 @@ abstract class advanced_testcase extends base_testcase {
      */
     public function assertDebuggingCalled($debugmessage = null, $debuglevel = null, $message = '') {
         $debugging = $this->getDebuggingMessages();
-        $debugdisplaymessage = "\n".phpunit_util::display_debugging_messages(true);
-        $this->resetDebugging();
-
         $count = count($debugging);
 
         if ($count == 0) {
@@ -293,13 +290,12 @@ abstract class advanced_testcase extends base_testcase {
         }
         if ($count > 1) {
             if ($message === '') {
-                $message = 'Expectation failed, debugging() triggered '.$count.' times.'.$debugdisplaymessage;
+                $message = 'Expectation failed, debugging() triggered '.$count.' times.';
             }
             $this->fail($message);
         }
         $this->assertEquals(1, $count);
 
-        $message .= $debugdisplaymessage;
         $debug = reset($debugging);
         if ($debugmessage !== null) {
             $this->assertSame($debugmessage, $debug->message, $message);
@@ -307,45 +303,8 @@ abstract class advanced_testcase extends base_testcase {
         if ($debuglevel !== null) {
             $this->assertSame($debuglevel, $debug->level, $message);
         }
-    }
 
-    /**
-     * Asserts how many times debugging has been called.
-     *
-     * @param int $expectedcount The expected number of times
-     * @param array $debugmessages Expected debugging messages, one for each expected message.
-     * @param array $debuglevels Expected debugging levels, one for each expected message.
-     * @param string $message
-     * @return void
-     */
-    public function assertDebuggingCalledCount($expectedcount, $debugmessages = array(), $debuglevels = array(), $message = '') {
-        if (!is_int($expectedcount)) {
-            throw new coding_exception('assertDebuggingCalledCount $expectedcount argument should be an integer.');
-        }
-
-        $debugging = $this->getDebuggingMessages();
-        $message .= "\n".phpunit_util::display_debugging_messages(true);
         $this->resetDebugging();
-
-        $this->assertEquals($expectedcount, count($debugging), $message);
-
-        if ($debugmessages) {
-            if (!is_array($debugmessages) || count($debugmessages) != $expectedcount) {
-                throw new coding_exception('assertDebuggingCalledCount $debugmessages should contain ' . $expectedcount . ' messages');
-            }
-            foreach ($debugmessages as $key => $debugmessage) {
-                $this->assertSame($debugmessage, $debugging[$key]->message, $message);
-            }
-        }
-
-        if ($debuglevels) {
-            if (!is_array($debuglevels) || count($debuglevels) != $expectedcount) {
-                throw new coding_exception('assertDebuggingCalledCount $debuglevels should contain ' . $expectedcount . ' messages');
-            }
-            foreach ($debuglevels as $key => $debuglevel) {
-                $this->assertSame($debuglevel, $debugging[$key]->level, $message);
-            }
-        }
     }
 
     /**
@@ -359,8 +318,6 @@ abstract class advanced_testcase extends base_testcase {
         if ($message === '') {
             $message = 'Expectation failed, debugging() was triggered.';
         }
-        $message .= "\n".phpunit_util::display_debugging_messages(true);
-        $this->resetDebugging();
         $this->assertEquals(0, $count, $message);
     }
 
@@ -649,66 +606,5 @@ abstract class advanced_testcase extends base_testcase {
                 $this->$callback($filepath);
             }
         }
-    }
-
-    /**
-     * Wait for a second to roll over, ensures future calls to time() return a different result.
-     *
-     * This is implemented instead of sleep() as we do not need to wait a full second. In some cases
-     * due to calls we may wait more than sleep() would have, on average it will be less.
-     */
-    public function waitForSecond() {
-        $starttime = time();
-        while (time() == $starttime) {
-            usleep(50000);
-        }
-    }
-
-    /**
-     * Run adhoc tasks, optionally matching the specified classname.
-     *
-     * @param   string  $matchclass The name of the class to match on.
-     * @param   int     $matchuserid The userid to match.
-     */
-    protected function runAdhocTasks($matchclass = '', $matchuserid = null) {
-        global $CFG, $DB;
-        require_once($CFG->libdir.'/cronlib.php');
-
-        $params = [];
-        if (!empty($matchclass)) {
-            if (strpos($matchclass, '\\') !== 0) {
-                $matchclass = '\\' . $matchclass;
-            }
-            $params['classname'] = $matchclass;
-        }
-
-        if (!empty($matchuserid)) {
-            $params['userid'] = $matchuserid;
-        }
-
-        $lock = $this->createMock(\core\lock\lock::class);
-        $cronlock = $this->createMock(\core\lock\lock::class);
-
-        $tasks = $DB->get_recordset('task_adhoc', $params);
-        foreach ($tasks as $record) {
-            // Note: This is for cron only.
-            // We do not lock the tasks.
-            $task = \core\task\manager::adhoc_task_from_record($record);
-
-            $task->set_lock($lock);
-            if (!$task->is_blocking()) {
-                $cronlock->release();
-            } else {
-                $task->set_cron_lock($cronlock);
-            }
-
-            cron_prepare_core_renderer();
-
-            $task->execute();
-            \core\task\manager::adhoc_task_complete($task);
-
-            unset($task);
-        }
-        $tasks->close();
     }
 }

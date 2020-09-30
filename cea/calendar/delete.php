@@ -58,11 +58,9 @@ if (!$course) {
     $PAGE->set_context(context_system::instance()); //TODO: wrong
 }
 
-$title = get_string('deleteevent', 'calendar');
-
 // Check the user has the required capabilities to edit an event
-if (!calendar_edit_event_allowed($event) || !empty($event->modulename)) {
-    print_error('nopermissions', 'error', $PAGE->url, $title);
+if (!calendar_edit_event_allowed($event)) {
+    print_error('nopermissions');
 }
 
 // Count the repeats, do we need to consider the possibility of deleting repeats
@@ -90,6 +88,7 @@ if ($confirm) {
 }
 
 // Prepare the page to show the confirmation form
+$title = get_string('deleteevent', 'calendar');
 $strcalendar = get_string('calendar', 'calendar');
 
 $PAGE->navbar->add($strcalendar, $viewcalendarurl);

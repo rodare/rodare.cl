@@ -24,7 +24,7 @@
 
 define('NO_MOODLE_COOKIES', true); // Session not used here.
 
-require(__DIR__ . '/../../../../../config.php');
+require(dirname(dirname(dirname(dirname(dirname(dirname(__FILE__)))))) . '/config.php');
 
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url('/lib/editor/tinymce/plugins/moodleemoticon/dialog.php');
@@ -47,7 +47,6 @@ header('X-UA-Compatible: IE=edge');
     <script type="text/javascript" src="<?php echo $plugin->get_tinymce_file_url('js/dialog.js'); ?>"></script>
 </head>
 <body>
-
 
     <table border="0" align="center" style="width:100%;">
 <?php

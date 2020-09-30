@@ -25,4 +25,3 @@
 $string['messages:addinstance'] = 'Add a new messages block';
 $string['messages:myaddinstance'] = 'Add a new messages block to Dashboard';
 $string['pluginname'] = 'Messages';
-$string['privacy:metadata'] = 'The Messages block only shows data stored in other locations.';

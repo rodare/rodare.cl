@@ -184,8 +184,7 @@ Y.Plugin.ScrollInfo = Y.Base.create('scrollInfoPlugin', Y.Plugin.Base, [], {
     **/
 
     /**
-    Whether or not the host node is the `<body>
-` element.
+    Whether or not the host node is the `<body>` element.
 
     @property {Boolean} _hostIsBody
     @protected
@@ -411,8 +410,7 @@ Y.Plugin.ScrollInfo = Y.Base.create('scrollInfoPlugin', Y.Plugin.Base, [], {
         ];
 
         // If the host node is the body, listen for the scroll event on the
-        // window, since <body>
- doesn't have a scroll event.
+        // window, since <body> doesn't have a scroll event.
         if (this._hostIsBody) {
             this._events.push(winNode.after('scroll', this._afterHostScroll, this));
         } else {
@@ -428,8 +426,7 @@ Y.Plugin.ScrollInfo = Y.Base.create('scrollInfoPlugin', Y.Plugin.Base, [], {
 
     /**
     Returns the DOM node that should be used to lookup scroll coordinates. In
-    some browsers, the `<body>
-` element doesn't return scroll coordinates, and
+    some browsers, the `<body>` element doesn't return scroll coordinates, and
     the documentElement must be used instead; this method takes care of
     determining which node should be used.
 

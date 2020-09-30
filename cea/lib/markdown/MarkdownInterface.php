@@ -8,7 +8,7 @@
 #
 # Original Markdown
 # Copyright (c) 2004-2006 John Gruber
-# <https://daringfireball.net/projects/markdown/>
+# <http://daringfireball.net/projects/markdown/>
 #
 namespace Michelf;
 

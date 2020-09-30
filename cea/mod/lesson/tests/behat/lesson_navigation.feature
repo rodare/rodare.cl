@@ -17,8 +17,10 @@ Feature: In a lesson activity, students can navigate through a series of pages i
       | teacher1 | C1 | editingteacher |
       | student1 | C1 | student |
     And I log in as "teacher1"
-    And I am on "Course 1" course homepage with editing mode on
+    And I follow "Course 1"
+    And I turn editing mode on
 
+  @javascript
   Scenario: Student navigation with pages and questions
     Given I add a "Lesson" to section "1" and I fill the form with:
       | Name | Test lesson name |
@@ -31,7 +33,7 @@ Feature: In a lesson activity, students can navigate through a series of pages i
       | id_answer_editor_0 | Next page |
       | id_jumpto_0 | Next page |
     And I press "Save page"
-    And I select "Add a content page" from the "qtype" singleselect
+    And I set the field "qtype" to "Add a content page"
     And I set the following fields to these values:
       | Page title | Second page name |
       | Page contents | Second page contents |
@@ -58,7 +60,7 @@ Feature: In a lesson activity, students can navigate through a series of pages i
     And I press "Save page"
     And I log out
     And I log in as "student1"
-    And I am on "Course 1" course homepage
+    And I follow "Course 1"
     When I follow "Test lesson name"
     Then I should see "First page contents"
     And I press "Next page"
@@ -87,6 +89,7 @@ Feature: In a lesson activity, students can navigate through a series of pages i
     And I should see "Congratulations - end of lesson reached"
     And I should see "Your score is 0 (out of 1)."
 
+  @javascript
   Scenario: Student reattempts a question until out of attempts
     Given I add a "Lesson" to section "1" and I fill the form with:
       | Name | Test lesson name |
@@ -106,7 +109,7 @@ Feature: In a lesson activity, students can navigate through a series of pages i
     And I press "Save page"
     And I log out
     And I log in as "student1"
-    And I am on "Course 1" course homepage
+    And I follow "Course 1"
     When I follow "Test lesson name"
     Then I should see "Test content"
     And I set the following fields to these values:

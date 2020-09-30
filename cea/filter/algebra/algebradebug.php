@@ -183,8 +183,7 @@ function refineTeX($texexp) {
 
 function outputText($texexp) {
   header("Content-type: text/html; charset=utf-8");
-  echo "<html><body>
-<pre>\n";
+  echo "<html><body><pre>\n";
   if ($texexp) {
     $texexp = str_replace('<','&lt;',$texexp);
     $texexp = str_replace('>','&gt;',$texexp);
@@ -275,7 +274,6 @@ function slasharguments($texexp, $md5) {
 <html>
 <head><title>Algebra Filter Debugger</title></head>
 <body>
-
     <p>Please enter an algebraic expression <b>without</b> any surrounding @@ into
        the text box below. (Click <a href="#help">here for help.</a>)
           <form action="algebradebug.php" method="get"

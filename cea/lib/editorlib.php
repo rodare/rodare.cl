@@ -225,12 +225,8 @@ abstract class texteditor {
 
     /**
      * Add required JS needed for editor
-     *
-     * Valid options may vary by editor. See the individual editor
-     * implementations of this function for documentation.
-     *
      * @param string $elementid id of text area to be converted to editor
-     * @param array $options Editor options
+     * @param array $options
      * @param obejct $fpoptions file picker options
      * @return void
      */

@@ -33,7 +33,7 @@ $PAGE->https_required();
     }
 
     // Set SAML domain cookie
-    $config = get_config('auth_shibboleth');
+    $config = get_config('auth/shibboleth');
 
 
     $IdPs = get_idp_list($config->organization_selection);
@@ -69,19 +69,7 @@ $PAGE->https_required();
     $PAGE->set_heading($site->fullname);
 
     echo $OUTPUT->header();
-
-    if (isloggedin() and !isguestuser()) {
-        // Prevent logging when already logged in, we do not want them to relogin by accident because sesskey would be changed.
-        echo $OUTPUT->box_start();
-        $params = array('sesskey' => sesskey(), 'loginpage' => 1);
-        $logout = new single_button(new moodle_url('/login/logout.php', $params), get_string('logout'), 'post');
-        $continue = new single_button(new moodle_url('/'), get_string('cancel'), 'get');
-        echo $OUTPUT->confirm(get_string('alreadyloggedin', 'error', fullname($USER)), $logout, $continue);
-        echo $OUTPUT->box_end();
-    } else {
-        include("index_form.html");
-    }
-
+    include("index_form.html");
     echo $OUTPUT->footer();
 
 

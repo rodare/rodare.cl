@@ -33,7 +33,6 @@ defined('MOODLE_INTERNAL') || die();
  * @param string $filearea
  * @param array $args
  * @param bool $forcedownload
- * @param array $options - List of options affecting file serving.
  * @return bool false if file not found, does not return if found - just send the file
  */
 function assignfeedback_editpdf_pluginfile($course,
@@ -41,8 +40,7 @@ function assignfeedback_editpdf_pluginfile($course,
                                            context $context,
                                            $filearea,
                                            $args,
-                                           $forcedownload,
-                                           array $options=array()) {
+                                           $forcedownload) {
     global $USER, $DB, $CFG;
 
     if ($context->contextlevel == CONTEXT_MODULE) {
@@ -74,7 +72,7 @@ function assignfeedback_editpdf_pluginfile($course,
             return false;
         }
         // Download MUST be forced - security!
-        send_stored_file($file, 0, 0, true, $options);// Check if we want to retrieve the stamps.
+        send_stored_file($file, 0, 0, true);// Check if we want to retrieve the stamps.
     }
 
 }

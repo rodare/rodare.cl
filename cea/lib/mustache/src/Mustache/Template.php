@@ -3,7 +3,7 @@
 /*
  * This file is part of Mustache.php.
  *
- * (c) 2010-2016 Justin Hileman
+ * (c) 2010-2015 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -164,15 +164,16 @@ abstract class Mustache_Template
      *
      * @param mixed            $value
      * @param Mustache_Context $context
+     * @param string           $indent
      *
      * @return string
      */
-    protected function resolveValue($value, Mustache_Context $context)
+    protected function resolveValue($value, Mustache_Context $context, $indent = '')
     {
         if (($this->strictCallables ? is_object($value) : !is_string($value)) && is_callable($value)) {
             return $this->mustache
                 ->loadLambda((string) call_user_func($value))
-                ->renderInternal($context);
+                ->renderInternal($context, $indent);
         }
 
         return $value;

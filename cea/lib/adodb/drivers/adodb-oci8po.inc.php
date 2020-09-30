@@ -1,6 +1,6 @@
 <?php
 /*
-@version   v5.20.7  20-Sep-2016
+@version   v5.20.1  06-Dec-2015
 @copyright (c) 2000-2013 John Lim. All rights reserved.
 @copyright (c) 2014      Damien Regad, Mark Newnham and the ADOdb community
   Released under both BSD license and Lesser GPL library license.
@@ -138,10 +138,8 @@ class ADORecordset_oci8po extends ADORecordset_oci8 {
 	// 10% speedup to move MoveNext to child class
 	function MoveNext()
 	{
-		$ret = @oci_fetch_array($this->_queryID,$this->fetchMode);
-		if($ret !== false) {
+		if(@OCIfetchinto($this->_queryID,$this->fields,$this->fetchMode)) {
 		global $ADODB_ANSI_PADDING_OFF;
-			$this->fields = $ret;
 			$this->_currentRow++;
 			$this->_updatefields();
 
@@ -171,12 +169,10 @@ class ADORecordset_oci8po extends ADORecordset_oci8 {
 				$arr = array();
 				return $arr;
 			}
-		$ret = @oci_fetch_array($this->_queryID,$this->fetchMode);
-		if ($ret === false) {
+		if (!@OCIfetchinto($this->_queryID,$this->fields,$this->fetchMode)) {
 			$arr = array();
 			return $arr;
 		}
-		$this->fields = $ret;
 		$this->_updatefields();
 		$results = array();
 		$cnt = 0;
@@ -192,9 +188,8 @@ class ADORecordset_oci8po extends ADORecordset_oci8 {
 	{
 		global $ADODB_ANSI_PADDING_OFF;
 
-		$ret = @oci_fetch_array($this->_queryID,$this->fetchMode);
+		$ret = @OCIfetchinto($this->_queryID,$this->fields,$this->fetchMode);
 		if ($ret) {
-			$this->fields = $ret;
 			$this->_updatefields();
 
 			if (!empty($ADODB_ANSI_PADDING_OFF)) {
@@ -203,7 +198,7 @@ class ADORecordset_oci8po extends ADORecordset_oci8 {
 				}
 			}
 		}
-		return $ret !== false;
+		return $ret;
 	}
 
 }

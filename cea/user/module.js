@@ -21,17 +21,10 @@ M.core_user.init_participation = function(Y) {
 	}, '#formactionid');
 
     Y.on('click', function(e) {
-        // Presence of a show all link indicates we should redirect to
-        // a page with all users listed and checked, otherwise just check
-        // those already shown.
-        var showallink = this.getAttribute('data-showallink');
-        if (showallink) {
-            window.location = showallink;
-        }
         Y.all('input.usercheckbox').each(function() {
             this.set('checked', 'checked');
         });
-    }, '#checkall, #checkallonpage');
+    }, '#checkall');
 
     Y.on('click', function(e) {
         Y.all('input.usercheckbox').each(function() {

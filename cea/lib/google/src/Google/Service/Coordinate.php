@@ -163,17 +163,13 @@ class Google_Service_Coordinate extends Google_Service
                   'location' => 'query',
                   'type' => 'string',
                 ),
-                'pageToken' => array(
-                  'location' => 'query',
-                  'type' => 'string',
-                ),
                 'maxResults' => array(
                   'location' => 'query',
                   'type' => 'integer',
                 ),
-                'omitJobChanges' => array(
+                'pageToken' => array(
                   'location' => 'query',
-                  'type' => 'boolean',
+                  'type' => 'string',
                 ),
               ),
             ),'patch' => array(
@@ -561,10 +557,8 @@ class Google_Service_Coordinate_Jobs_Resource extends Google_Service_Resource
    *
    * @opt_param string minModifiedTimestampMs Minimum time a job was modified in
    * milliseconds since epoch.
-   * @opt_param string pageToken Continuation token
    * @opt_param string maxResults Maximum number of results to return in one page.
-   * @opt_param bool omitJobChanges Whether to omit detail job history
-   * information.
+   * @opt_param string pageToken Continuation token
    * @return Google_Service_Coordinate_JobListResponse
    */
   public function listJobs($teamId, $optParams = array())

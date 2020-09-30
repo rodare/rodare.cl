@@ -25,10 +25,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @since      2.9
  */
-define(['jquery', 'core/config', 'core/log'], function($, config, Log) {
-
-    // Keeps track of when the user leaves the page so we know not to show an error.
-    var unloading = false;
+define(['jquery', 'core/config'], function($, config) {
 
     /**
      * Success handler. Called when the ajax call succeeds. Checks each response and
@@ -45,18 +42,6 @@ define(['jquery', 'core/config', 'core/log'], function($, config, Log) {
         var i = 0;
         var request;
         var response;
-
-        if (responses.error) {
-            // There was an error with the request as a whole.
-            // We need to reject each promise.
-            // Unfortunately this may lead to duplicate dialogues, but each Promise must be rejected.
-            for (; i < requests.length; i++) {
-                request = requests[i];
-                request.deferred.reject(responses);
-            }
-
-            return;
-        }
 
         for (i = 0; i < requests.length; i++) {
             request = requests[i];
@@ -93,9 +78,8 @@ define(['jquery', 'core/config', 'core/log'], function($, config, Log) {
      * @private
      * @param {jqXHR} jqXHR The ajax object.
      * @param {string} textStatus The status string.
-     * @param {Error|Object} exception The error thrown.
      */
-    var requestFail = function(jqXHR, textStatus, exception) {
+    var requestFail = function(jqXHR, textStatus) {
         // Reject all the promises.
         var requests = this;
 
@@ -103,12 +87,8 @@ define(['jquery', 'core/config', 'core/log'], function($, config, Log) {
         for (i = 0; i < requests.length; i++) {
             var request = requests[i];
 
-            if (unloading) {
-                // No need to trigger an error because we are already navigating.
-                Log.error("Page unloaded.");
-                Log.error(exception);
-            } else {
-                request.deferred.reject(exception);
+            if (typeof request.fail != "undefined") {
+                request.deferred.reject(textStatus);
             }
         }
     };
@@ -119,7 +99,7 @@ define(['jquery', 'core/config', 'core/log'], function($, config, Log) {
          * Make a series of ajax requests and return all the responses.
          *
          * @method call
-         * @param {Object[]} requests Array of requests with each containing methodname and args properties.
+         * @param {Object[]} Array of requests with each containing methodname and args properties.
          *                   done and fail callbacks can be set for each element in the array, or the
          *                   can be attached to the promises returned by this function.
          * @param {Boolean} async Optional, defaults to true.
@@ -131,14 +111,9 @@ define(['jquery', 'core/config', 'core/log'], function($, config, Log) {
          * @return {Promise[]} Array of promises that will be resolved when the ajax call returns.
          */
         call: function(requests, async, loginrequired) {
-            $(window).bind('beforeunload', function() {
-                unloading = true;
-            });
             var ajaxRequestData = [],
                 i,
-                promises = [],
-                methodInfo = [],
-                requestInfo = '';
+                promises = [];
 
             if (typeof loginrequired === "undefined") {
                 loginrequired = true;
@@ -164,13 +139,6 @@ define(['jquery', 'core/config', 'core/log'], function($, config, Log) {
                     request.deferred.fail(request.fail);
                 }
                 request.index = i;
-                methodInfo.push(request.methodname);
-            }
-
-            if (methodInfo.length <= 5) {
-                requestInfo = methodInfo.sort().join();
-            } else {
-                requestInfo = methodInfo.length + '-method-calls';
             }
 
             ajaxRequestData = JSON.stringify(ajaxRequestData);
@@ -184,22 +152,20 @@ define(['jquery', 'core/config', 'core/log'], function($, config, Log) {
                 contentType: "application/json"
             };
 
-            var script = 'service.php';
+            var script = config.wwwroot + '/lib/ajax/service.php?sesskey=' + config.sesskey;
             if (!loginrequired) {
-                script = 'service-nologin.php';
+                script = config.wwwroot + '/lib/ajax/service-nologin.php?sesskey=' + config.sesskey;
             }
-            var url = config.wwwroot + '/lib/ajax/' + script +
-                    '?sesskey=' + config.sesskey + '&info=' + requestInfo;
 
             // Jquery deprecated done and fail with async=false so we need to do this 2 ways.
             if (async) {
-                $.ajax(url, settings)
+                $.ajax(script, settings)
                     .done(requestSuccess)
                     .fail(requestFail);
             } else {
                 settings.success = requestSuccess;
                 settings.error = requestFail;
-                $.ajax(url, settings);
+                $.ajax(script, settings);
             }
 
             return promises;

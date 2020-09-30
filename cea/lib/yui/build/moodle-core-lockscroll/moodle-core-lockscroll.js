@@ -56,7 +56,12 @@ Y.namespace('M.core').LockScroll = Y.Base.create('lockScroll', Y.Plugin.Base, []
             return;
         }
 
-        if (!this.shouldLockScroll(forceOnSmallWindow)) {
+        var dialogueHeight = this.get('host').get('boundingBox').get('region').height,
+            // Most modern browsers use win.innerHeight, but some older versions of IE use documentElement.clientHeight.
+            // We fall back to 0 if neither can be found which has the effect of disabling scroll locking.
+            windowHeight = Y.config.win.innerHeight || Y.config.doc.documentElement.clientHeight || 0;
+
+        if (!forceOnSmallWindow && dialogueHeight > (windowHeight - 10)) {
             return;
         }
 
@@ -87,44 +92,6 @@ Y.namespace('M.core').LockScroll = Y.Base.create('lockScroll', Y.Plugin.Base, []
     },
 
     /**
-     * Recalculate whether lock scrolling should be on or off.
-     *
-     * @method shouldLockScroll
-     * @param {Boolean} forceOnSmallWindow Whether to enable the scroll lock, even for small window sizes.
-     * @return boolean
-     */
-    shouldLockScroll: function(forceOnSmallWindow) {
-        var dialogueHeight = this.get('host').get('boundingBox').get('region').height,
-            // Most modern browsers use win.innerHeight, but some older versions of IE use documentElement.clientHeight.
-            // We fall back to 0 if neither can be found which has the effect of disabling scroll locking.
-            windowHeight = Y.config.win.innerHeight || Y.config.doc.documentElement.clientHeight || 0;
-
-        if (!forceOnSmallWindow && dialogueHeight > (windowHeight - 10)) {
-            return false;
-        } else {
-            return true;
-        }
-    },
-
-    /**
-     * Recalculate whether lock scrolling should be on or off because the size of the dialogue changed.
-     *
-     * @method updateScrollLock
-     * @param {Boolean} forceOnSmallWindow Whether to enable the scroll lock, even for small window sizes.
-     * @chainable
-     */
-    updateScrollLock: function(forceOnSmallWindow) {
-        // Both these functions already check if scroll lock is active and do the right thing.
-        if (this.shouldLockScroll(forceOnSmallWindow)) {
-            this.enableScrollLock(forceOnSmallWindow);
-        } else {
-            this.disableScrollLock(true);
-        }
-
-        return this;
-    },
-
-    /**
      * Stop locking the page scroll.
      *
      * The instance may be disabled but the scroll lock not removed if other instances of the
@@ -133,7 +100,7 @@ Y.namespace('M.core').LockScroll = Y.Base.create('lockScroll', Y.Plugin.Base, []
      * @method disableScrollLock
      * @chainable
      */
-    disableScrollLock: function(force) {
+    disableScrollLock: function() {
         if (this.isActive()) {
             this._enabled = false;
 
@@ -144,7 +111,7 @@ Y.namespace('M.core').LockScroll = Y.Base.create('lockScroll', Y.Plugin.Base, []
             var currentCount = parseInt(body.getAttribute('data-activeScrollLocks'), 10) || 1,
                 newCount = currentCount - 1;
 
-            if (force || currentCount === 1) {
+            if (currentCount === 1) {
                 body.removeClass('lockscroll');
                 body.setStyle('maxWidth', null);
             }

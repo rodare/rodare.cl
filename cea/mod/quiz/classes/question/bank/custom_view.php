@@ -167,7 +167,6 @@ class custom_view extends \core_question\bank\view {
             $params = array(
                     'type' => 'submit',
                     'name' => 'add',
-                    'class' => 'btn btn-primary',
                     'value' => get_string('addselectedquestionstoquiz', 'quiz'),
             );
             if ($cmoptions->hasattempts) {

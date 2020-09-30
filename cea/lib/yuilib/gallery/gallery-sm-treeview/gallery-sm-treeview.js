@@ -174,8 +174,7 @@ TreeView = Y.Base.create('treeView', Y.View, [
     Renders this TreeView into its container.
 
     If the container hasn't already been added to the current document, it will
-    be appended to the `<body>
-` element.
+    be appended to the `<body>` element.
 
     @method render
     @chainable

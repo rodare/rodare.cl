@@ -442,8 +442,7 @@ class portfolio_format_leap2a_entry {
      * Either way it sets the type attribute of the top level element.
      * Moodle should always provide xhtml content, but user-defined content can't be trusted
      *
-     * @todo MDL-31304 - convert <html><body>
- </body></html> to xml
+     * @todo MDL-31304 - convert <html><body> </body></html> to xml
      * @param DomDocument $dom the dom doc to use
      * @param string $tagname usually 'content' or 'summary'
      * @param string $content the content to use, either xhtml or html.
@@ -467,8 +466,7 @@ class portfolio_format_leap2a_entry {
             $topel->setAttribute('type', 'html');
             $topel->nodeValue = $content;
             // TODO figure out how to convert this to xml
-            // TODO because we end up with <html><body>
- </body></html> wrapped around it
+            // TODO because we end up with <html><body> </body></html> wrapped around it
             // which is annoying
         // either we already know it's text from the first check
         // or nothing else has worked anyway

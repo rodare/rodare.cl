@@ -23,8 +23,6 @@ class Html2Text
 {
     const ENCODING = 'UTF-8';
 
-    protected $htmlFuncFlags;
-
     /**
      * Contains the HTML content to convert.
      *
@@ -49,25 +47,27 @@ class Html2Text
     protected $search = array(
         "/\r/",                                           // Non-legal carriage return
         "/[\n\t]+/",                                      // Newlines and tabs
-        '/<head\b[^>]*>.*?<\/head>/i',                    // <head>
-        '/<script\b[^>]*>.*?<\/script>/i',                // <script>s -- which strip_tags supposedly has problems with
-        '/<style\b[^>]*>.*?<\/style>/i',                  // <style>s -- which strip_tags supposedly has problems with
-        '/<i\b[^>]*>(.*?)<\/i>/i',                        // <i>
-        '/<em\b[^>]*>(.*?)<\/em>/i',                      // <em>
-        '/(<ul\b[^>]*>|<\/ul>)/i',                        // <ul> and </ul>
-        '/(<ol\b[^>]*>|<\/ol>)/i',                        // <ol> and </ol>
-        '/(<dl\b[^>]*>|<\/dl>)/i',                        // <dl> and </dl>
-        '/<li\b[^>]*>(.*?)<\/li>/i',                      // <li> and </li>
-        '/<dd\b[^>]*>(.*?)<\/dd>/i',                      // <dd> and </dd>
-        '/<dt\b[^>]*>(.*?)<\/dt>/i',                      // <dt> and </dt>
-        '/<li\b[^>]*>/i',                                 // <li>
-        '/<hr\b[^>]*>/i',                                 // <hr>
-        '/<div\b[^>]*>/i',                                // <div>
-        '/(<table\b[^>]*>|<\/table>)/i',                  // <table> and </table>
-        '/(<tr\b[^>]*>|<\/tr>)/i',                        // <tr> and </tr>
-        '/<td\b[^>]*>(.*?)<\/td>/i',                      // <td> and </td>
+        '/<head[^>]*>.*?<\/head>/i',                      // <head>
+        '/<script[^>]*>.*?<\/script>/i',                  // <script>s -- which strip_tags supposedly has problems with
+        '/<style[^>]*>.*?<\/style>/i',                    // <style>s -- which strip_tags supposedly has problems with
+        '/<p[^>]*>/i',                                    // <P>
+        '/<br[^>]*>/i',                                   // <br>
+        '/<i[^>]*>(.*?)<\/i>/i',                          // <i>
+        '/<em[^>]*>(.*?)<\/em>/i',                        // <em>
+        '/(<ul[^>]*>|<\/ul>)/i',                          // <ul> and </ul>
+        '/(<ol[^>]*>|<\/ol>)/i',                          // <ol> and </ol>
+        '/(<dl[^>]*>|<\/dl>)/i',                          // <dl> and </dl>
+        '/<li[^>]*>(.*?)<\/li>/i',                        // <li> and </li>
+        '/<dd[^>]*>(.*?)<\/dd>/i',                        // <dd> and </dd>
+        '/<dt[^>]*>(.*?)<\/dt>/i',                        // <dt> and </dt>
+        '/<li[^>]*>/i',                                   // <li>
+        '/<hr[^>]*>/i',                                   // <hr>
+        '/<div[^>]*>/i',                                  // <div>
+        '/(<table[^>]*>|<\/table>)/i',                    // <table> and </table>
+        '/(<tr[^>]*>|<\/tr>)/i',                          // <tr> and </tr>
+        '/<td[^>]*>(.*?)<\/td>/i',                        // <td> and </td>
         '/<span class="_html2text_ignore">.+?<\/span>/i', // <span class="_html2text_ignore">...</span>
-        '/<(img)\b[^>]*alt=\"([^>"]+)\"[^>]*>/i',         // <img> with alt tag
+        '/<(img)[^>]*alt=\"([^>"]+)\"[^>]*>/i',           // <img> with alt tag
     );
 
     /**
@@ -82,6 +82,8 @@ class Html2Text
         '',                              // <head>
         '',                              // <script>s -- which strip_tags supposedly has problems with
         '',                              // <style>s -- which strip_tags supposedly has problems with
+        "\n\n",                          // <P>
+        "\n",                            // <br>
         '_\\1_',                         // <i>
         '_\\1_',                         // <em>
         "\n\n",                          // <ul> and </ul>
@@ -135,8 +137,6 @@ class Html2Text
      */
     protected $callbackSearch = array(
         '/<(h)[123456]( [^>]*)?>(.*?)<\/h[123456]>/i',           // h1 - h6
-        '/[ ]*<(p)( [^>]*)?>(.*?)<\/p>[ ]*/si',                  // <p> with surrounding whitespace.
-        '/<(br)[^>]*>[ ]*/i',                                    // <br> with leading whitespace after the newline.
         '/<(b)( [^>]*)?>(.*?)<\/b>/i',                           // <b>
         '/<(strong)( [^>]*)?>(.*?)<\/strong>/i',                 // <strong>
         '/<(th)( [^>]*)?>(.*?)<\/th>/i',                         // <th> and </th>
@@ -212,7 +212,6 @@ class Html2Text
                                 // 'inline' (show links inline)
                                 // 'nextline' (show links on the next line)
                                 // 'table' (if a table of link URLs should be listed after the text.
-                                // 'bbcode' (show links as bbcode)
 
         'width' => 70,          //  Maximum width of the formatted text, in columns.
                                 //  Set this value to 0 (or less) to ignore word wrapping
@@ -238,9 +237,6 @@ class Html2Text
 
         $this->html = $html;
         $this->options = array_merge($this->options, $options);
-        $this->htmlFuncFlags = (PHP_VERSION_ID < 50400)
-            ? ENT_COMPAT
-            : ENT_COMPAT | ENT_HTML5;
     }
 
     /**
@@ -324,16 +320,6 @@ class Html2Text
 
     protected function convert()
     {
-       $origEncoding = mb_internal_encoding();
-       mb_internal_encoding(self::ENCODING);
-
-       $this->doConvert();
-
-       mb_internal_encoding($origEncoding);
-    }
-
-    protected function doConvert()
-    {
         $this->linkList = array();
 
         $text = trim($this->html);
@@ -360,7 +346,7 @@ class Html2Text
         $text = preg_replace_callback($this->callbackSearch, array($this, 'pregCallback'), $text);
         $text = strip_tags($text);
         $text = preg_replace($this->entSearch, $this->entReplace, $text);
-        $text = html_entity_decode($text, $this->htmlFuncFlags, self::ENCODING);
+        $text = html_entity_decode($text, ENT_QUOTES, self::ENCODING);
 
         // Remove unknown/unhandled entities (this cannot be done in search-and-replace block)
         $text = preg_replace('/&([a-zA-Z0-9]{2,6}|#[0-9]{2,4});/', '', $text);
@@ -410,7 +396,7 @@ class Html2Text
             $url = $link;
         } else {
             $url = $this->baseurl;
-            if (mb_substr($link, 0, 1) != '/') {
+            if (substr($link, 0, 1) != '/') {
                 $url .= '/';
             }
             $url .= $link;
@@ -425,8 +411,6 @@ class Html2Text
             return $display . ' [' . ($index + 1) . ']';
         } elseif ($linkMethod == 'nextline') {
             return $display . "\n[" . $url . ']';
-        } elseif ($linkMethod == 'bbcode') {
-            return sprintf('[url=%s]%s[/url]', $url, $display);
         } else { // link_method defaults to inline
             return $display . ' [' . $url . ']';
         }
@@ -436,8 +420,7 @@ class Html2Text
     {
         // get the content of PRE element
         while (preg_match('/<pre[^>]*>(.*)<\/pre>/ismU', $text, $matches)) {
-            // Replace br tags with newlines to prevent the search-and-replace callback from killing whitespace
-            $this->preContent = preg_replace('/(<br\b[^>]*>)/i', "\n", $matches[1]);
+            $this->preContent = $matches[1];
 
             // Run our defined tags search-and-replace with callback
             $this->preContent = preg_replace_callback(
@@ -473,13 +456,11 @@ class Html2Text
     protected function convertBlockquotes(&$text)
     {
         if (preg_match_all('/<\/*blockquote[^>]*>/i', $text, $matches, PREG_OFFSET_CAPTURE)) {
-            $originalText = $text;
             $start = 0;
             $taglen = 0;
             $level = 0;
             $diff = 0;
             foreach ($matches[0] as $m) {
-                $m[1] = mb_strlen(substr($originalText, 0, $m[1]));
                 if ($m[0][0] == '<' && $m[0][1] == '/') {
                     $level--;
                     if ($level < 0) {
@@ -490,7 +471,7 @@ class Html2Text
                         $end = $m[1];
                         $len = $end - $taglen - $start;
                         // Get blockquote content
-                        $body = mb_substr($text, $start + $taglen - $diff, $len);
+                        $body = substr($text, $start + $taglen - $diff, $len);
 
                         // Set text width
                         $pWidth = $this->options['width'];
@@ -500,21 +481,20 @@ class Html2Text
                         $this->converter($body);
                         // Add citation markers and create PRE block
                         $body = preg_replace('/((^|\n)>*)/', '\\1> ', trim($body));
-                        $body = '<pre>' . htmlspecialchars($body, $this->htmlFuncFlags, self::ENCODING) . '</pre>';
+                        $body = '<pre>' . htmlspecialchars($body) . '</pre>';
                         // Re-set text width
                         $this->options['width'] = $pWidth;
                         // Replace content
-                        $text = mb_substr($text, 0, $start - $diff)
-                            . $body
-                            . mb_substr($text, $end + mb_strlen($m[0]) - $diff);
+                        $text = substr($text, 0, $start - $diff)
+                            . $body . substr($text, $end + strlen($m[0]) - $diff);
 
-                        $diff += $len + $taglen + mb_strlen($m[0]) - mb_strlen($body);
+                        $diff = $len + $taglen + strlen($m[0]) - strlen($body);
                         unset($body);
                     }
                 } else {
                     if ($level == 0) {
                         $start = $m[1];
-                        $taglen = mb_strlen($m[0]);
+                        $taglen = strlen($m[0]);
                     }
                     $level++;
                 }
@@ -530,18 +510,7 @@ class Html2Text
      */
     protected function pregCallback($matches)
     {
-        switch (mb_strtolower($matches[1])) {
-            case 'p':
-                // Replace newlines with spaces.
-                $para = str_replace("\n", " ", $matches[3]);
-
-                // Trim trailing and leading whitespace within the tag.
-                $para = trim($para);
-
-                // Add trailing newlines for this para.
-                return "\n" . $para . "\n";
-            case 'br':
-                return "\n";
+        switch (strtolower($matches[1])) {
             case 'b':
             case 'strong':
                 return $this->toupper($matches[3]);
@@ -584,7 +553,7 @@ class Html2Text
     protected function toupper($str)
     {
         // string can contain HTML tags
-        $chunks = preg_split('/(<[^>]*>)/', $str, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+        $chunks = preg_split('/(<[^>]*>)/', $str, null, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
 
         // convert toupper only the text between HTML tags
         foreach ($chunks as $i => $chunk) {
@@ -604,9 +573,15 @@ class Html2Text
      */
     protected function strtoupper($str)
     {
-        $str = html_entity_decode($str, $this->htmlFuncFlags, self::ENCODING);
-        $str = mb_strtoupper($str);
-        $str = htmlspecialchars($str, $this->htmlFuncFlags, self::ENCODING);
+        $str = html_entity_decode($str, ENT_COMPAT, self::ENCODING);
+
+        if (function_exists('mb_strtoupper')) {
+            $str = mb_strtoupper($str, self::ENCODING);
+        } else {
+            $str = strtoupper($str);
+        }
+
+        $str = htmlspecialchars($str, ENT_COMPAT, self::ENCODING);
 
         return $str;
     }

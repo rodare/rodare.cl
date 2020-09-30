@@ -22,10 +22,6 @@
 
 require_once('HTML/QuickForm/group.php');
 require_once('HTML/QuickForm/select.php');
-/**
- * Static utility methods.
- */
-require_once 'HTML/QuickForm/utils.php';
 
 /**
  * Class to dynamically create two or more HTML Select elements
@@ -130,12 +126,9 @@ class HTML_QuickForm_hierselect extends HTML_QuickForm_group
     } //end constructor
 
     /**
-     * Old syntax of class constructor. Deprecated in PHP7.
-     *
-     * @deprecated since Moodle 3.1
+     * Old syntax of class constructor for backward compatibility.
      */
     public function HTML_QuickForm_hierselect($elementName=null, $elementLabel=null, $attributes=null, $separator=null) {
-        debugging('Use of class name as constructor is deprecated', DEBUG_DEVELOPER);
         self::__construct($elementName, $elementLabel, $attributes, $separator);
     }
 
@@ -237,19 +230,16 @@ class HTML_QuickForm_hierselect extends HTML_QuickForm_group
      */
     function _setOptions()
     {
-        $arrayKeys = [];
+        $toLoad = '';
         foreach (array_keys($this->_elements) AS $key) {
-            if (isset($this->_options[$key])) {
-                if ((empty($arrayKeys)) || HTML_QuickForm_utils::recursiveIsset($this->_options[$key], $arrayKeys)) {
-                    $array = empty($arrayKeys) ? $this->_options[$key] : HTML_QuickForm_utils::recursiveValue($this->_options[$key], $arrayKeys);
-                    if (is_array($array)) {
-                        $select =& $this->_elements[$key];
-                        $select->_options = array();
-                        $select->loadArray($array);
-                        $value = is_array($v = $select->getValue()) ? $v[0] : key($array);
-                        $arrayKeys[] = $value;
-                    }
-                }
+            $array = eval("return isset(\$this->_options[{$key}]{$toLoad})? \$this->_options[{$key}]{$toLoad}: null;");
+            if (is_array($array)) {
+                $select =& $this->_elements[$key];
+                $select->_options = array();
+                $select->loadArray($array);
+
+                $value  = is_array($v = $select->getValue()) ? $v[0] : key($array);
+                $toLoad .= '[\'' . str_replace(array('\\', '\''), array('\\\\', '\\\''), $value) . '\']';
             }
         }
     } // end func _setOptions

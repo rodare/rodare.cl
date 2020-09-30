@@ -28,11 +28,10 @@ require_once('locallib.php');
 
 $attemptid = required_param('attempt', PARAM_INT);
 $slot = required_param('slot', PARAM_INT); // The question number in the attempt.
-$cmid = optional_param('cmid', null, PARAM_INT);
 
 $PAGE->set_url('/mod/quiz/comment.php', array('attempt' => $attemptid, 'slot' => $slot));
 
-$attemptobj = quiz_create_attempt_handling_errors($attemptid, $cmid);
+$attemptobj = quiz_attempt::create($attemptid);
 $student = $DB->get_record('user', array('id' => $attemptobj->get_userid()));
 
 // Can only grade finished attempts.
@@ -123,7 +122,7 @@ echo $attemptobj->render_question_for_commenting($slot);
     <div>
         <div class="fitem fitem_actionbuttons fitem_fsubmit">
             <fieldset class="felement fsubmit">
-                <input id="id_submitbutton" type="submit" name="submit" class="btn btn-primary" value="<?php
+                <input id="id_submitbutton" type="submit" name="submit" value="<?php
                         print_string('save', 'quiz'); ?>"/>
             </fieldset>
         </div>

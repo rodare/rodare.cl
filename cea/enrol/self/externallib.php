@@ -67,7 +67,8 @@ class enrol_self_external extends external_api {
             throw new moodle_exception('invaliddata', 'error');
         }
 
-        self::validate_context(context_system::instance());
+        // Note that we can't use validate_context because the user is not enrolled in the course.
+        require_login(null, false, null, false, true);
 
         $enrolinstance = $DB->get_record('enrol', array('id' => $params['instanceid']), '*', MUST_EXIST);
         $course = $DB->get_record('course', array('id' => $enrolinstance->courseid), '*', MUST_EXIST);
@@ -145,7 +146,8 @@ class enrol_self_external extends external_api {
 
         $course = get_course($params['courseid']);
         $context = context_course::instance($course->id);
-        self::validate_context(context_system::instance());
+        // Note that we can't use validate_context because the user is not enrolled in the course.
+        require_login(null, false, null, false, true);
 
         if (!$course->visible and !has_capability('moodle/course:viewhiddencourses', $context)) {
             throw new moodle_exception('coursehidden');

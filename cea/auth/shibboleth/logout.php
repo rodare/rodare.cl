@@ -23,18 +23,16 @@ if (!is_enabled_auth('shibboleth')) {
 }
 
 // Front channel logout.
-$inputstream = file_get_contents("php://input");
 if ($action == 'logout' && !empty($redirect)) {
 
-    if (isloggedin($USER) && $USER->auth == 'shibboleth') {
-        // Logout user from application.
+    if ($USER->auth == 'shibboleth') {
+        // Logout out user from application.
         require_logout();
+         // Finally, send user to the return URL.
+        redirect($redirect);
     }
 
-    // Finally, send user to the return URL.
-    redirect($redirect);
-
-} else if (!empty($inputstream)) {
+} else if (!file_get_contents("php://input")) {
 
     // Back channel logout.
     // Set SOAP header.

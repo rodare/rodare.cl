@@ -112,16 +112,13 @@ if (!empty($errormsg)) {
     if ($launchcontainer == LTI_LAUNCH_CONTAINER_EMBED || $launchcontainer == LTI_LAUNCH_CONTAINER_EMBED_NO_BLOCKS) {
         // Output a page containing some script to break out of frames and redirect them.
 
-        echo '<html><body>
-';
+        echo '<html><body>';
 
         $script = "
             <script type=\"text/javascript\">
             //<![CDATA[
                 if(window != top){
                     top.location.href = '{$url}';
-                } else {
-                    window.location.href = '{$url}';
                 }
             //]]
             </script>

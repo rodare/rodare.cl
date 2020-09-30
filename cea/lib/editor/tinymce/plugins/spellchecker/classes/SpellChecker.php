@@ -19,11 +19,8 @@ class SpellChecker {
 
     /**
      * Old syntax of class constructor. Deprecated in PHP7.
-     *
-     * @deprecated since Moodle 3.1
      */
     public function SpellChecker(&$config) {
-        debugging('Use of class name as constructor is deprecated', DEBUG_DEVELOPER);
         self::__construct($config);
     }
 

@@ -29,10 +29,9 @@ $string['configdndresizewidth'] = 'When a label is created from a dragged & drop
 $string['dndmedia'] = 'Media drag and drop';
 $string['dndresizeheight'] = 'Resize drag and drop height';
 $string['dndresizewidth'] = 'Resize drag and drop width';
-$string['dnduploadlabel'] = 'Add media to course page';
+$string['dnduploadlabel'] = 'Add image to course page';
 $string['dnduploadlabeltext'] = 'Add a label to the course page';
 $string['label:addinstance'] = 'Add a new label';
-$string['label:view'] = 'View label';
 $string['labeltext'] = 'Label text';
 $string['modulename'] = 'Label';
 $string['modulename_help'] = 'The label module enables text and multimedia to be inserted into the course page in between links to other resources and activities. Labels are very versatile and can help to improve the appearance of a course if used thoughtfully.
@@ -44,7 +43,5 @@ Labels may be used
 * To add a short description to a course section';
 $string['modulename_link'] = 'mod/label/view';
 $string['modulenameplural'] = 'Labels';
-$string['privacy:metadata'] = 'The mod_label plugin does not store any personal data.';
 $string['pluginadministration'] = 'Label administration';
 $string['pluginname'] = 'Label';
-$string['search:activity'] = 'Label';

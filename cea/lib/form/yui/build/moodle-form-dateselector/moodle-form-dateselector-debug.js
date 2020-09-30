@@ -1,7 +1,5 @@
 YUI.add('moodle-form-dateselector', function (Y, NAME) {
 
-/* global CALENDAR, MOODLECALENDAR */
-
 /**
  * Add some custom methods to the node class to make our lives a little
  * easier within this module.
@@ -23,7 +21,7 @@ Y.mix(Y.Node.prototype, {
         if (this.get('nodeName').toLowerCase() !== 'select') {
             return false;
         }
-        return this.all('option').item(this.optionSize() - 1).get('value');
+        return this.all('option').item(this.optionSize()-1).get('value');
     },
     /**
      * Gets the number of options in the select box
@@ -69,8 +67,7 @@ M.form.dateselector = {
         this.panel = new Y.Overlay({
             visible: false,
             bodyContent: Y.Node.create('<div id="dateselector-calendar-content"></div>'),
-            id: 'dateselector-calendar-panel',
-            constrain: true // constrain panel to viewport.
+            id: 'dateselector-calendar-panel'
         });
         this.panel.render(document.body);
         // zIndex is added by panel.render() and is set to 0.
@@ -79,9 +76,7 @@ M.form.dateselector = {
         Y.one('#dateselector-calendar-panel').setStyle('zIndex', null);
         this.panel.on('heightChange', this.fix_position, this);
 
-        Y.one('#dateselector-calendar-panel').on('click', function(e) {
-            e.halt();
-        });
+        Y.one('#dateselector-calendar-panel').on('click', function(e){e.halt();});
         Y.one(document.body).on('click', this.document_click, this);
 
         this.calendar = new MOODLECALENDAR({
@@ -97,7 +92,7 @@ M.form.dateselector = {
                 config.wed,
                 config.thu,
                 config.fri,
-                config.sat]
+                config.sat ]
         });
     },
     cancel_any_timeout: function() {
@@ -131,6 +126,7 @@ M.form.dateselector = {
                     Y.WidgetPositionAlign.TR
                 ];
             }
+
 
             this.panel.set('align', {
                 node: this.currentowner.get('node').one('select'),
@@ -204,7 +200,7 @@ CALENDAR.prototype = {
     closepopup: true,
     initializer: function() {
         var controls = this.get('node').all('select');
-        controls.each(function(node) {
+        controls.each(function(node){
             if (node.get('name').match(/\[year\]/)) {
                 this.yearselect = node;
             } else if (node.get('name').match(/\[month\]/)) {
@@ -350,7 +346,7 @@ CALENDAR.prototype = {
 Y.extend(CALENDAR, Y.Base, CALENDAR.prototype, {
     NAME: 'Date Selector',
     ATTRS: {
-        firstdayofweek: {
+        firstdayofweek : {
             validator: Y.Lang.isString
         },
         node: {

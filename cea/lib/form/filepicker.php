@@ -29,7 +29,6 @@ global $CFG;
 
 require_once("HTML/QuickForm/button.php");
 require_once($CFG->dirroot.'/repository/lib.php');
-require_once('templatable_form_element.php');
 
 /**
  * Filepicker form element
@@ -41,10 +40,7 @@ require_once('templatable_form_element.php');
  * @copyright 2009 Dongsheng Cai <dongsheng@moodle.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class MoodleQuickForm_filepicker extends HTML_QuickForm_input implements templatable {
-    use templatable_form_element {
-        export_for_template as export_for_template_base;
-    }
+class MoodleQuickForm_filepicker extends HTML_QuickForm_input {
     /** @var string html for help button, if empty then no help will icon will be dispalyed. */
     public $_helpbutton = '';
 
@@ -89,12 +85,9 @@ class MoodleQuickForm_filepicker extends HTML_QuickForm_input implements templat
     }
 
     /**
-     * Old syntax of class constructor. Deprecated in PHP7.
-     *
-     * @deprecated since Moodle 3.1
+     * Old syntax of class constructor for backward compatibility.
      */
     public function MoodleQuickForm_filepicker($elementName=null, $elementLabel=null, $attributes=null, $options=null) {
-        debugging('Use of class name as constructor is deprecated', DEBUG_DEVELOPER);
         self::__construct($elementName, $elementLabel, $attributes, $options);
     }
 
@@ -223,11 +216,5 @@ class MoodleQuickForm_filepicker extends HTML_QuickForm_input implements templat
         }
 
         return $this->_prepareValue($draftitemid, true);
-    }
-
-    public function export_for_template(renderer_base $output) {
-        $context = $this->export_for_template_base($output);
-        $context['html'] = $this->toHtml();
-        return $context;
     }
 }

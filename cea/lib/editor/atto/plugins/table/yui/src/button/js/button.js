@@ -104,7 +104,7 @@ var COMPONENT = 'atto_table',
                         'style="background-color:transparent;color:transparent">' +
 
                             '<input id="{{../elementid}}_atto_table_bordercolour_-1"' +
-                            'type="radio" name="borderColour" value="none" checked="checked"' +
+                            'type="radio" name="borderColour" value="none" checked="checked"'+
                             'title="{{get_string "themedefault" component}}"></input>' +
 
                             '{{get_string "themedefault" component}}' +
@@ -131,7 +131,7 @@ var COMPONENT = 'atto_table',
                         'style="background-color:transparent;color:transparent">' +
 
                             '<input id="{{../elementid}}_atto_table_backgroundcolour_-1"' +
-                            'type="radio" name="backgroundColour" value="none" checked="checked"' +
+                            'type="radio" name="backgroundColour" value="none" checked="checked"'+
                             'title="{{get_string "themedefault" component}}"></input>' +
 
                             '{{get_string "themedefault" component}}' +
@@ -139,7 +139,7 @@ var COMPONENT = 'atto_table',
 
                         '{{#each availableColours}}' +
                             '<label for="{{../elementid}}_atto_table_backgroundcolour_{{@index}}"' +
-                            'style="background-color:{{this}};color:{{this}}">' +
+                            'style="background-color:{{this}};color:{{this}}">'+
 
                                 '<input id="{{../elementid}}_atto_table_backgroundcolour_{{@index}}"' +
                                 'type="radio" name="backgroundColour" value="' + '{{this}}' + '" title="{{this}}">' +
@@ -315,7 +315,7 @@ Y.namespace('M.atto_table').Button = Y.Base.create('button', Y.M.editor_atto.Edi
      * @return {boolean} whether or not the parameter node exists within the editor.
      */
     _stopAtContentEditableFilter: function(node) {
-        return this.editor.contains(node);
+        this.editor.contains(node);
     },
 
     /**
@@ -370,10 +370,10 @@ Y.namespace('M.atto_table').Button = Y.Base.create('button', Y.M.editor_atto.Edi
     _updateAvailableSettings: function() {
         var tableForm = this._content,
             enableBorders = tableForm.one('[name="borders"]'),
-            borderStyle = tableForm.one('[name="borderstyles"]'),
-            borderSize = tableForm.one('[name="bordersize"]'),
-            borderColour = tableForm.all('[name="borderColour"]'),
-            disabledValue = 'removeAttribute';
+            borderStyle     = tableForm.one('[name="borderstyles"]'),
+            borderSize      = tableForm.one('[name="bordersize"]'),
+            borderColour    = tableForm.all('[name="borderColour"]'),
+            disabledValue   = 'removeAttribute';
 
         if (!enableBorders) {
             return;
@@ -409,13 +409,12 @@ Y.namespace('M.atto_table').Button = Y.Base.create('button', Y.M.editor_atto.Edi
     _getSuitableTableCell: function() {
         var targetcell = null,
             host = this.get('host');
-        var stopAtContentEditableFilter = Y.bind(this._stopAtContentEditableFilter, this);
 
-        host.getSelectedNodes().some(function(node) {
-            if (node.ancestor('td, th, caption', true, stopAtContentEditableFilter)) {
+        host.getSelectedNodes().some(function (node) {
+            if (node.ancestor('td, th, caption', true, this._stopAtContentEditableFilter)) {
                 targetcell = node;
 
-                var caption = node.ancestor('caption', true, stopAtContentEditableFilter);
+                var caption = node.ancestor('caption', true, this._stopAtContentEditableFilter);
                 if (caption) {
                     var table = caption.get('parentNode');
                     if (table) {
@@ -515,7 +514,7 @@ Y.namespace('M.atto_table').Button = Y.Base.create('button', Y.M.editor_atto.Edi
 
         // Add the row headers.
         if (headers.get('value') === 'rows' || headers.get('value') === 'both') {
-            table.all('tr').each(function(row) {
+            table.all('tr').each(function (row) {
                 var cells = row.all('th, td'),
                     firstCell = cells.shift(),
                     newCell;
@@ -529,7 +528,7 @@ Y.namespace('M.atto_table').Button = Y.Base.create('button', Y.M.editor_atto.Edi
                 }
 
                 // Now make sure all other cells in the row are td.
-                cells.each(function(cell) {
+                cells.each(function (cell) {
                     if (cell.get('tagName') === 'TH') {
                         newCell = this._changeNodeType(cell, 'td');
                         newCell.removeAttribute('scope');
@@ -544,7 +543,7 @@ Y.namespace('M.atto_table').Button = Y.Base.create('button', Y.M.editor_atto.Edi
                 firstRow = rows.shift(),
                 newCell;
 
-            firstRow.all('td, th').each(function(cell) {
+            firstRow.all('td, th').each(function (cell) {
                 if (cell.get('tagName') === 'TD') {
                     // Cell is a td but should be a th - change it.
                     newCell = this._changeNodeType(cell, 'th');
@@ -686,8 +685,8 @@ Y.namespace('M.atto_table').Button = Y.Base.create('button', Y.M.editor_atto.Edi
         rows.each(function(row) {
             var cells = row.all('td, th'),
                 cell = cells.item(columnindex),
-                cellprev = cells.item(columnindex - 1),
-                cellnext = cells.item(columnindex + 1);
+                cellprev = cells.item(columnindex-1),
+                cellnext = cells.item(columnindex+1);
             currentcells.push(cell);
             if (cellprev) {
                 prevcells.push(cellprev);
@@ -1049,7 +1048,7 @@ Y.namespace('M.atto_table').Button = Y.Base.create('button', Y.M.editor_atto.Edi
         var cells = this._findColumnCells();
 
         // Check we have some tds in this column, and one exists to the right.
-        if ((cells.next.size() > 0) &&
+        if ( (cells.next.size() > 0) &&
                 (cells.current.size() === cells.next.size()) &&
                 (cells.current.filter('td').size() > 0)) {
             var i = 0;
@@ -1330,7 +1329,7 @@ Y.namespace('M.atto_table').Button = Y.Base.create('button', Y.M.editor_atto.Edi
             return;
         }
         var newrow = firstrow.cloneNode(true);
-        newrow.all('th, td').each(function(tablecell) {
+        newrow.all('th, td').each(function (tablecell) {
             if (tablecell.get('tagName') === 'TH') {
                 if (tablecell.getAttribute('scope') !== 'row') {
                     var newcell = Y.Node.create('<td></td>');

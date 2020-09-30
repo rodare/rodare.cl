@@ -41,7 +41,7 @@ if (isset($CFG->maxbytes)) {
     $element = new admin_setting_configselect('assignsubmission_file/maxbytes',
                                               $name,
                                               $description,
-                                              $CFG->maxbytes,
+                                              1048576,
                                               get_max_upload_sizes($CFG->maxbytes, 0, 0, $maxbytes));
     $settings->add($element);
 }
