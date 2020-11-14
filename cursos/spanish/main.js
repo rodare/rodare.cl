@@ -71,3 +71,19 @@ function toggleContent9() {
   contentId.style.display == "block" ? contentId.style.display = "none" : 
 contentId.style.display = "block"; 
 }
+
+function toggleContent10() {
+  // Get the DOM reference
+  var contentId = document.getElementById("content10");
+  // Toggle 
+  contentId.style.display == "block" ? contentId.style.display = "none" : 
+contentId.style.display = "block"; 
+}
+
+function toggleContent11() {
+  // Get the DOM reference
+  var contentId = document.getElementById("content11");
+  // Toggle 
+  contentId.style.display == "block" ? contentId.style.display = "none" : 
+contentId.style.display = "block"; 
+}
